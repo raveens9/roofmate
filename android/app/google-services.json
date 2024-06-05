@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "561841551444",
+    "project_id": "test-7bb64",
+    "storage_bucket": "test-7bb64.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:561841551444:android:14e2fb5c19536a04f495c1",
+        "android_client_info": {
+          "package_name": "com.example.roofmate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDH4Hg3muI6DpmsgmLAM--zJfUGjd2IVz0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
