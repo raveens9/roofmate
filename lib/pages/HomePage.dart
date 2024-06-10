@@ -41,7 +41,6 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('RoofMate', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30)),
-        centerTitle: true,
         backgroundColor: Colors.blue[100],
         actions: [
           IconButton(onPressed: signUserOut, icon: const Icon(Icons.logout))
@@ -68,11 +67,11 @@ class _HomePageState extends State<HomePage> {
             label: 'Chat',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.monitor_heart),
+            icon: Icon(Icons.favorite_border_rounded),
             label: 'Saved',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.verified_user),
+            icon: Icon(Icons.person),
             label: 'Profile',
           ),
         ],
@@ -129,6 +128,7 @@ class _ExplorePageState extends State<ExplorePage> {
                   final String name = data['item'].toString().toLowerCase();
                   final String description = data['description'].toString().toLowerCase();
                   final String imageUrl = data['imageurl'] ?? '';
+                  final String price = data['price '].toString().toLowerCase();
                   return name.contains(searchQuery) || description.contains(searchQuery);
                 }).toList();
 
@@ -137,6 +137,7 @@ class _ExplorePageState extends State<ExplorePage> {
                   final String name = data['item'];
                   final String description = data['description'];
                   final String imageUrl = data['imageurl'] ?? '';
+                  final String price = data['price '];
                   final String docId = doc.id; // Get the document ID
 
                   return Padding(
@@ -164,19 +165,29 @@ class _ExplorePageState extends State<ExplorePage> {
                               color: Colors.grey[300],
                               child: Icon(Icons.image, color: Colors.grey[700]),
                             ),
-                            Row(
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                Row(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(8,8,8,0),
+                                      child: Text(name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                    ),
+                                    // IconButton(
+                                    Icon(Icons.favorite_border),
+                                    // onPressed: () {
+                                    //   toggleFavorite(docId);
+                                    // },
+
+                                  ],
+                                ),
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
-                                  child: Text(name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                                ),
-                                // IconButton(
-                                Icon(Icons.favorite_border),
-                                // onPressed: () {
-                                //   toggleFavorite(docId);
-                                // },
-
+                                  child: Text("Rs."+price+" per night",style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold),),
+                                )
                               ],
+
                             ),
 
                           ],

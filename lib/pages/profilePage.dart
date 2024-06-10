@@ -1,8 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:roofmate/components/textBox.dart';
-
+import 'dart:io';
+import 'addListing.dart'; // Import the AddListingPage
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -10,36 +13,63 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-
   final user = FirebaseAuth.instance.currentUser!;
-  final usersCollection=FirebaseFirestore.instance.collection('Users');
+  final usersCollection = FirebaseFirestore.instance.collection('Users');
+  final ImagePicker _picker = ImagePicker();
 
-  Future<void> editField(String field) async
-  {
-    String newValue="";
-    await showDialog(context: context, builder: (context)=>AlertDialog(
-      title: Text("Edit $field"),
-      content: TextField(
-        autofocus: true,
-        decoration: InputDecoration(
-            hintText: 'Edit $field'
+  Future<void> editField(String field) async {
+    String newValue = "";
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Edit $field"),
+        content: TextField(
+          autofocus: true,
+          decoration: InputDecoration(hintText: 'Edit $field'),
+          onChanged: (value) {
+            newValue = value;
+          },
         ),
-        onChanged: (value){
-          newValue=value;
-        },
+        actions: [
+          TextButton(
+            child: Text('Cancel'),
+            onPressed: () => Navigator.pop(context),
+          ),
+          TextButton(
+            child: Text('Save'),
+            onPressed: () => Navigator.of(context).pop(newValue),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(child: Text('Cancel'),onPressed: ()=> Navigator.pop(context),),
-        TextButton(child: Text('Save'),onPressed: ()=> Navigator.of(context).pop(newValue)),
-      ],
-    )
     );
 
-
-    if(newValue.trim().length>0)
-    {
-      await usersCollection.doc(user.email).update({field:newValue});
+    if (newValue.trim().length > 0) {
+      await usersCollection.doc(user.email).update({field: newValue});
     }
+  }
+
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      final file = File(pickedFile.path);
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('profile_pictures/${user.uid}.jpg');
+      final uploadTask = storageRef.putFile(file);
+
+      final snapshot = await uploadTask.whenComplete(() => {});
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+
+      await usersCollection.doc(user.email).update({'profilePicture': downloadUrl});
+    }
+  }
+
+  void _navigateToAddListing() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AddListingPage()),
+    );
   }
 
   @override
@@ -50,35 +80,58 @@ class _ProfilePageState extends State<ProfilePage> {
         backgroundColor: Colors.blue[100],
       ),
       body: StreamBuilder<DocumentSnapshot>(
-          stream: FirebaseFirestore.instance.collection('Users').doc(user.email).snapshots(),
-          builder: (context, snapshot) {
-            if(snapshot.hasData)
-            {
-              final userData = snapshot.data!.data() as Map<String,dynamic>;
+        stream: usersCollection.doc(user.email).snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final userData = snapshot.data!.data() as Map<String, dynamic>;
+            final String profilePictureUrl = userData['profilePicture'] ?? '';
 
-              return ListView(
-                children: [
-                  SizedBox(height: 50,),
-                  Icon(Icons.person,size: 72,),
-                  Text(user.email!,textAlign: TextAlign.center,),
-                  SizedBox(height: 20,),
-                  const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text("My Details"),
+            return ListView(
+              children: [
+                SizedBox(height: 30),
+                GestureDetector(
+                  onTap: _pickImage,
+                  child: CircleAvatar(
+                    radius: 50,
+                    backgroundImage: profilePictureUrl.isNotEmpty
+                        ? NetworkImage(profilePictureUrl)
+                        : null,
+                    child: profilePictureUrl.isEmpty
+                        ? Icon(Icons.person, size: 72)
+                        : null,
                   ),
-                  MyTextBox(text: userData['username'], sectionName: 'Name',onPressed: ()=> editField('username') ,),
-                  MyTextBox(text: userData['bio'], sectionName: 'Bio',onPressed: ()=> editField('bio') ,),
-                  MyTextBox(text: 'Empty', sectionName: 'Posts',onPressed: ()=> editField('posts') ,)
-                ],
-              );
-
-            }
-            else if(snapshot.hasError)
-            {
-              return Center(child: Text("Error${snapshot.error}"));
-            }
-            return const Center(child: CircularProgressIndicator());
+                ),
+                SizedBox(height: 20),
+                Text(
+                  user.email!,
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 20),
+                const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text("My Details"),
+                ),
+                MyTextBox(
+                  text: userData['username'],
+                  sectionName: 'Name',
+                  onPressed: () => editField('username'),
+                ),
+                MyTextBox(
+                  text: userData['bio'],
+                  sectionName: 'Bio',
+                  onPressed: () => editField('bio'),
+                ),
+              ],
+            );
+          } else if (snapshot.hasError) {
+            return Center(child: Text("Error${snapshot.error}"));
           }
+          return const Center(child: CircularProgressIndicator());
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _navigateToAddListing,
+        child: Icon(Icons.add),
       ),
     );
   }

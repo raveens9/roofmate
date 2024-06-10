@@ -59,7 +59,7 @@ class _RegisterPageState extends State<RegisterPage> {
             .doc(userCredential.user?.email)
             .set({
           'username': usernameController.text.split('@')[0],
-          'bio':'empty bio'
+          'bio':'Tell us about yourself'
         });
       }
       else
