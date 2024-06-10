@@ -1,153 +1,85 @@
-import 'dart:io';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
-import 'package:roofmate/services/media_service.dart';
+import 'package:roofmate/components/textBox.dart';
+
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({Key? key}) : super(key: key);
-
   @override
-  _ProfilePageState createState() => _ProfilePageState();
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final GetIt _getIt = GetIt.instance;
-  final GlobalKey<FormState> _profileFormKey = GlobalKey();
 
-  late MediaService _mediaService;
+  final user = FirebaseAuth.instance.currentUser!;
+  final usersCollection=FirebaseFirestore.instance.collection('Users');
 
-  File? selectedImage;
+  Future<void> editField(String field) async
+  {
+    String newValue="";
+    await showDialog(context: context, builder: (context)=>AlertDialog(
+      title: Text("Edit $field"),
+      content: TextField(
+        autofocus: true,
+        decoration: InputDecoration(
+            hintText: 'Edit $field'
+        ),
+        onChanged: (value){
+          newValue=value;
+        },
+      ),
+      actions: [
+        TextButton(child: Text('Cancel'),onPressed: ()=> Navigator.pop(context),),
+        TextButton(child: Text('Save'),onPressed: ()=> Navigator.of(context).pop(newValue)),
+      ],
+    )
+    );
 
-  @override
-  void initState() {
-    super.initState();
-    //_mediaService = _getIt.get<MediaService>();
+
+    if(newValue.trim().length>0)
+    {
+      await usersCollection.doc(user.email).update({field:newValue});
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile'),
+        title: const Text('Profile Page'),
+        backgroundColor: Colors.blue[100],
       ),
-      body: _buildUI(),
-    );
-  }
+      body: StreamBuilder<DocumentSnapshot>(
+          stream: FirebaseFirestore.instance.collection('Users').doc(user.email).snapshots(),
+          builder: (context, snapshot) {
+            if(snapshot.hasData)
+            {
+              final userData = snapshot.data!.data() as Map<String,dynamic>;
 
-  Widget _buildUI() {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 15.0,
-          vertical: 20.0,
-        ),
-        child: Column(
-          children: [
-            _headerText(),
-            _profileForm(),
-          ],
-        ),
-      ),
-    );
-  }
+              return ListView(
+                children: [
+                  SizedBox(height: 50,),
+                  Icon(Icons.person,size: 72,),
+                  Text(user.email!,textAlign: TextAlign.center,),
+                  SizedBox(height: 20,),
+                  const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Text("My Details"),
+                  ),
+                  MyTextBox(text: userData['username'], sectionName: 'Name',onPressed: ()=> editField('username') ,),
+                  MyTextBox(text: userData['bio'], sectionName: 'Bio',onPressed: ()=> editField('bio') ,),
+                  MyTextBox(text: 'Empty', sectionName: 'Posts',onPressed: ()=> editField('posts') ,)
+                ],
+              );
 
-  Widget _headerText() {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width,
-      child: const Column(
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Profile",
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _profileForm() {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.60,
-      margin: EdgeInsets.symmetric(
-        vertical: MediaQuery.of(context).size.height * 0.05,
-      ),
-      child: Form(
-        key: _profileFormKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            _pfpSelectionField(),
-            //CustomFormField(),
-            _registerButton(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _pfpSelectionField() {
-    return GestureDetector(
-      onTap: () async {
-        File? file = await _mediaService.getImageFromGallery();
-        if (file != null) {
-          setState(() {
-            selectedImage = file;
-          });
-        }
-      },
-      child: CircleAvatar(
-        radius: MediaQuery.of(context).size.width*0.15,
-        backgroundImage: selectedImage != null
-        ? FileImage(selectedImage!)
-        : NetworkImage('https://www.google.com/url?sa=i&url=https%3A%2F%2Ffineartsconference.com%2Fconference-chair-and-committee%2Fimage-placeholder-icon-11%2F&psig=AOvVaw0fmBvYepEm94CBL-2KL4Jh&ust=1717772580456000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCMDf5aKfx4YDFQAAAAAdAAAAABAR') as ImageProvider,
-      ),
-    );
-  }
-
-  Widget _registerButton(){
-    return SizedBox(
-      width: MediaQuery.sizeOf(context).width,
-      child: MaterialButton(
-        color: Theme.of(context).colorScheme.primary,
-        onPressed: () async{
-        /*  try{
-            if((_registerFormKey.currentState?.validate() ?? false) && 
-            selectedImage != null){
-              _registerFormKey.currentState?.save();
-              bool result = await _authService.signup(email!,password!);
-              if(result){
-                String? pfpURL = await _storageService.uploadUserPfp(// commented 1
-                  file: selectedImage!, uid: _authService.user!.uid, // commented 2
-                  );
-                  if(pfpURL != null){// commented 1
-                    await _databaseService.createUserProfile:(userProfile: UserProfile(// commented 3
-                      uid: _authService.user!.uid,// commented 4
-                    name: name, pfpURL: pfpURL))// commented 5
-                  }
-              }
             }
-            
-          }catch(e){
-            print(e);
-          }*/
-        },
-        child: const Text(
-          "Confirm",
-          style: TextStyle(
-            color: Colors.white,
-          )
-        ),
-        )
-
+            else if(snapshot.hasError)
+            {
+              return Center(child: Text("Error${snapshot.error}"));
+            }
+            return const Center(child: CircularProgressIndicator());
+          }
+      ),
     );
   }
-
 }

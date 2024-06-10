@@ -76,10 +76,7 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             children: [
               const SizedBox(height: 60,),
-              const Icon(
-                Icons.lock,
-                size: 100,
-              ),
+              Image(image: AssetImage('assets/logo.png'),width: 300,),
         
               const SizedBox(height: 90),
         
@@ -105,7 +102,7 @@ class _LoginPageState extends State<LoginPage> {
                 obscureText: true,
               ),
         
-              const SizedBox(height: 180,),
+              const SizedBox(height: 110,),
         
               const Text('Forgot Password?'),
         
