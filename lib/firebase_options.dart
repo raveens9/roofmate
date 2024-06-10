@@ -57,6 +57,7 @@ class DefaultFirebaseOptions {
     appId: '1:561841551444:android:14e2fb5c19536a04f495c1',
     messagingSenderId: '561841551444',
     projectId: 'test-7bb64',
+    databaseURL: 'https://test-7bb64-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'test-7bb64.appspot.com',
   );
 

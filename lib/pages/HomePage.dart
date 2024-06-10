@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:roofmate/readData/get_location.dart';
+import 'package:roofmate/pages/chatPage.dart';
+import 'package:roofmate/pages/profilePage.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({super.key});
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -41,13 +42,29 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _selectedIndex = index;
     });
+    if (_selectedIndex == 4) {
+      // Navigate to the ProfilePage when "Profile" icon is clicked
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ProfilePage()),
+      );
+    }
+
+    if (_selectedIndex == 1) {
+      // Navigate to the ProfilePage when "Profile" icon is clicked
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Chatpage()),
+      );
+    }
   }
 
-  List<Widget> _widgetOptions = <Widget>[
-    Text('Home Page'),
-    Text('Chats Page'),
-    Text('Updates Page'),
-    Text('Camera Page'),
+  final List<Widget> _widgetOptions = <Widget>[
+    const Text('Home Page'),
+    const Text('Chats Page'),
+    const Text('Updates Page'),
+    const Text('Camera Page'),
+    const Text ('User Profile'),
   ];
 
   @override
@@ -65,7 +82,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           TextField(
             controller: searchController,
-            decoration: InputDecoration(prefixIcon: Icon(Icons.search)),
+            decoration: const InputDecoration(prefixIcon: Icon(Icons.search)),
           ),
           Expanded(
             child: Center(
@@ -91,6 +108,10 @@ class _HomePageState extends State<HomePage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.camera),
             label: 'Camera',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
           ),
         ],
         currentIndex: _selectedIndex,

@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:roofmate/pages/LoginPage.dart';
 import 'package:roofmate/pages/HomePage.dart';
 import 'package:roofmate/pages/login_or_register.dart';
 
@@ -15,7 +14,7 @@ class AuthPage extends StatelessWidget {
         builder: (context, snapshot){
           if(snapshot.hasData)
             {
-              return HomePage();
+              return const HomePage();
             }
           else
             {

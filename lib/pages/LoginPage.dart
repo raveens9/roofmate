@@ -1,12 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:roofmate/components/mytextfield.dart';
 import 'package:roofmate/components/mybutton.dart';
+import 'package:roofmate/components/mytextfield.dart';
 
 class LoginPage extends StatefulWidget {
   final Function()? onTap;
-  LoginPage({super.key, this.onTap});
+  const LoginPage({super.key, this.onTap});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -76,7 +75,7 @@ class _LoginPageState extends State<LoginPage> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              SizedBox(height: 60,),
+              const SizedBox(height: 60,),
               const Icon(
                 Icons.lock,
                 size: 100,
@@ -84,7 +83,7 @@ class _LoginPageState extends State<LoginPage> {
         
               const SizedBox(height: 90),
         
-              Text(
+              const Text(
                 'Welcome back!',
                 style: TextStyle(
                   color: Colors.blueGrey,
@@ -92,13 +91,13 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
         
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
         
               MyTextField(
-                controller: usernameController, hintText: 'Username', obscureText: false,
+                controller: usernameController, hintText: 'Email', obscureText: false,
               ),
         
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
         
               MyTextField(
                 controller: passwordController,
@@ -117,16 +116,16 @@ class _LoginPageState extends State<LoginPage> {
                 text:  'Sign In'
               ),
 
-              SizedBox(height: 20,),
+              const SizedBox(height: 20,),
         
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Not a Member?'),
-                  SizedBox(width: 10,),
+                  const Text('Not a Member?'),
+                  const SizedBox(width: 10,),
                   GestureDetector(
                     onTap: widget.onTap,
-                    child: Text('Register Now',
+                    child: const Text('Register Now',
                     style: TextStyle(color: Colors.blueAccent
                     ),),
                   )
