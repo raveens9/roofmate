@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:roofmate/components/textBox.dart';
 import 'dart:io';
-import 'addListing.dart'; // Import the AddListingPage
+
+import 'AddListingPage.dart'; // Ensure this file contains the AddListing widget
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -43,8 +44,8 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
 
-    if (newValue.trim().length > 0) {
-      await usersCollection.doc(user.email).update({field: newValue});
+    if (newValue.trim().isNotEmpty) {
+      await usersCollection.doc(user.uid).update({field: newValue});
     }
   }
 
@@ -61,14 +62,14 @@ class _ProfilePageState extends State<ProfilePage> {
       final snapshot = await uploadTask.whenComplete(() => {});
       final downloadUrl = await snapshot.ref.getDownloadURL();
 
-      await usersCollection.doc(user.email).update({'profilePicture': downloadUrl});
+      await usersCollection.doc(user.uid).update({'profilePicture': downloadUrl});
     }
   }
 
   void _navigateToAddListing() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => AddListingPage()),
+      MaterialPageRoute(builder: (context) => AddListing()),
     );
   }
 
@@ -80,7 +81,7 @@ class _ProfilePageState extends State<ProfilePage> {
         backgroundColor: Colors.blue[100],
       ),
       body: StreamBuilder<DocumentSnapshot>(
-        stream: usersCollection.doc(user.email).snapshots(),
+        stream: usersCollection.doc(user.uid).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final userData = snapshot.data!.data() as Map<String, dynamic>;
@@ -103,7 +104,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 SizedBox(height: 20),
                 Text(
-                  user.email!,
+                  userData['email'] ?? user.email!,
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 20),
@@ -112,9 +113,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: Text("My Details"),
                 ),
                 MyTextBox(
-                  text: userData['username'],
+                  text: userData['name'],
                   sectionName: 'Name',
-                  onPressed: () => editField('username'),
+                  onPressed: () => editField('name'),
                 ),
                 MyTextBox(
                   text: userData['bio'],
@@ -124,7 +125,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ],
             );
           } else if (snapshot.hasError) {
-            return Center(child: Text("Error${snapshot.error}"));
+            return Center(child: Text("Error: ${snapshot.error}"));
           }
           return const Center(child: CircularProgressIndicator());
         },
