@@ -1,13 +1,11 @@
-// lib/pages/HomePage.dart
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:roofmate/pages/chatPage.dart';
 import 'package:roofmate/pages/savedPage.dart';
 import 'package:roofmate/pages/ProfilePage.dart';
-import 'package:roofmate/pages/detailsPage.dart';
-import 'package:roofmate/pages/AddListingPage.dart'; // Import the AddListingPage
+// import 'package:roofmate/components/textBox.dart';
+import 'detailsPage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -32,8 +30,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   final List<Widget> _widgetOptions = <Widget>[
-    const ExplorePage(),
-    const Chatpage(),
+    ExplorePage(),
+    Chatpage(),
     SavedPage(),
     ProfilePage(),
   ];
@@ -42,10 +40,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'RoofMate',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
-        ),
+        title: const Text('RoofMate', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30)),
         backgroundColor: Colors.blue[100],
         actions: [
           IconButton(onPressed: signUserOut, icon: const Icon(Icons.logout))
@@ -60,21 +55,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      // Conditionally display the FloatingActionButton only on ExplorePage
-      floatingActionButton: _selectedIndex == 0
-          ? FloatingActionButton(
-        onPressed: () {
-          // Navigate to AddListingPage when FAB is pressed
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => AddListingPage()),
-          );
-        },
-        child: const Icon(Icons.add),
-        backgroundColor: Colors.blueAccent,
-      )
-          : null, // No FAB for other pages
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat, // Position FAB at bottom right
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         items: const <BottomNavigationBarItem>[
@@ -98,7 +78,7 @@ class _HomePageState extends State<HomePage> {
         currentIndex: _selectedIndex,
         unselectedItemColor: Colors.black,
         selectedItemColor: Colors.blue[300],
-        selectedLabelStyle: const TextStyle(
+        selectedLabelStyle: TextStyle(
           fontWeight: FontWeight.bold,
           color: Colors.black,
         ),
@@ -109,8 +89,6 @@ class _HomePageState extends State<HomePage> {
 }
 
 class ExplorePage extends StatefulWidget {
-  const ExplorePage({Key? key}) : super(key: key);
-
   @override
   _ExplorePageState createState() => _ExplorePageState();
 }
@@ -123,19 +101,13 @@ class _ExplorePageState extends State<ExplorePage> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Search TextField
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: TextField(
             controller: searchController,
             decoration: InputDecoration(
-              prefixIcon: const Icon(Icons.search),
+              prefixIcon: Icon(Icons.search),
               hintText: 'Search...',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-              filled: true,
-              fillColor: Colors.white,
             ),
             onChanged: (value) {
               setState(() {
@@ -144,36 +116,28 @@ class _ExplorePageState extends State<ExplorePage> {
             },
           ),
         ),
-        // Listings StreamBuilder
         Expanded(
-          child: StreamBuilder<QuerySnapshot>(
+          child: StreamBuilder(
             stream: FirebaseFirestore.instance.collection('Locations').snapshots(),
             builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
               if (streamSnapshot.hasData) {
                 final List<DocumentSnapshot> boardingDocs = streamSnapshot.data!.docs;
 
-                // Filter documents based on search query
                 final List<DocumentSnapshot> filteredDocs = boardingDocs.where((doc) {
                   final Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
                   final String name = data['item'].toString().toLowerCase();
                   final String description = data['description'].toString().toLowerCase();
-                  // Ensure field names are correct (removed trailing space in 'price ')
-                  final String price = (data['price'] ?? '').toString().toLowerCase();
+                  final String imageUrl = data['imageurl'] ?? '';
+                  final String price = data['price '].toString().toLowerCase();
                   return name.contains(searchQuery) || description.contains(searchQuery);
                 }).toList();
 
-                if (filteredDocs.isEmpty) {
-                  return const Center(
-                    child: Text('No listings found.'),
-                  );
-                }
-
                 final List<Widget> boardingWidgets = filteredDocs.map((DocumentSnapshot doc) {
                   final Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-                  final String name = data['item'] ?? 'No Name';
-                  final String description = data['description'] ?? 'No Description';
+                  final String name = data['item'];
+                  final String description = data['description'];
                   final String imageUrl = data['imageurl'] ?? '';
-                  final String price = data['price']?.toString() ?? '0';
+                  final String price = data['price '];
                   final String docId = doc.id; // Get the document ID
 
                   return Padding(
@@ -190,56 +154,47 @@ class _ExplorePageState extends State<ExplorePage> {
                         );
                       },
                       child: Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        elevation: 4,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Listing Image
-                            ClipRRect(
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                              child: imageUrl.isNotEmpty
-                                  ? Image.network(
-                                imageUrl,
-                                width: double.infinity,
-                                height: 150,
-                                fit: BoxFit.cover,
-                              )
-                                  : Container(
-                                width: double.infinity,
-                                height: 150,
-                                color: Colors.grey[300],
-                                child: const Icon(Icons.image, color: Colors.grey, size: 50),
-                              ),
+                            imageUrl.isNotEmpty
+                                ? Image.network(imageUrl, width: double.infinity, height: 150, fit: BoxFit.cover)
+                                : Container(
+                              width: double.infinity,
+                              height: 150,
+                              color: Colors.grey[300],
+                              child: Icon(Icons.image, color: Colors.grey[700]),
                             ),
-                            // Listing Details
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      name,
-                                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(8,8,8,0),
+                                      child: Text(name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                                     ),
-                                  ),
-                                  const Icon(Icons.favorite_border, color: Colors.redAccent),
-                                ],
-                              ),
+                                    // IconButton(
+                                    Icon(Icons.favorite_border),
+                                    // onPressed: () {
+                                    //   toggleFavorite(docId);
+                                    // },
+
+                                  ],
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text("Rs."+price+" per night",style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold),),
+                                )
+                              ],
+
                             ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                "Rs. $price per night",
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
+
                           ],
                         ),
+
                       ),
+
                     ),
                   );
                 }).toList();
@@ -249,8 +204,7 @@ class _ExplorePageState extends State<ExplorePage> {
                 );
               }
 
-              // Loading Indicator
-              return const Center(child: CircularProgressIndicator());
+              return Center(child: CircularProgressIndicator());
             },
           ),
         ),
