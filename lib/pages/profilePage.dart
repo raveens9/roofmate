@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:roofmate/components/textBox.dart';
 import 'dart:io';
-import 'addListing.dart'; // Import the AddListingPage
+import 'AddListingPage.dart'; // Import the AddListingPage
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -65,7 +65,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  void _navigateToAddListing() {
+  void _navigateToAddListingPage() {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => AddListingPage()),
@@ -130,7 +130,7 @@ class _ProfilePageState extends State<ProfilePage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _navigateToAddListing,
+        onPressed: _navigateToAddListingPage,
         child: Icon(Icons.add),
       ),
     );
