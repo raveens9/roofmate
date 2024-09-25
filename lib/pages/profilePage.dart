@@ -1,3 +1,4 @@
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -44,8 +45,8 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
 
-    if (newValue.trim().isNotEmpty) {
-      await usersCollection.doc(user.uid).update({field: newValue});
+    if (newValue.trim().length > 0) {
+      await usersCollection.doc(user.email).update({field: newValue});
     }
   }
 
@@ -62,7 +63,7 @@ class _ProfilePageState extends State<ProfilePage> {
       final snapshot = await uploadTask.whenComplete(() => {});
       final downloadUrl = await snapshot.ref.getDownloadURL();
 
-      await usersCollection.doc(user.uid).update({'profilePicture': downloadUrl});
+      await usersCollection.doc(user.email).update({'profilePicture': downloadUrl});
     }
   }
 
@@ -81,7 +82,7 @@ class _ProfilePageState extends State<ProfilePage> {
         backgroundColor: Colors.blue[100],
       ),
       body: StreamBuilder<DocumentSnapshot>(
-        stream: usersCollection.doc(user.uid).snapshots(),
+        stream: usersCollection.doc(user.email).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final userData = snapshot.data!.data() as Map<String, dynamic>;
@@ -104,7 +105,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 SizedBox(height: 20),
                 Text(
-                  userData['email'] ?? user.email!,
+                  user.email!,
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 20),
@@ -113,9 +114,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: Text("My Details"),
                 ),
                 MyTextBox(
-                  text: userData['name'],
+                  text: userData['username'],
                   sectionName: 'Name',
-                  onPressed: () => editField('name'),
+                  onPressed: () => editField('username'),
                 ),
                 MyTextBox(
                   text: userData['bio'],
@@ -125,7 +126,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ],
             );
           } else if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
+            return Center(child: Text("Error${snapshot.error}"));
           }
           return const Center(child: CircularProgressIndicator());
         },

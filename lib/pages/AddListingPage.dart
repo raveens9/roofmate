@@ -1,5 +1,4 @@
-// lib/pages/AddListingPage.dart
-
+import 'package:url_launcher/url_launcher.dart'; // Import url_launcher
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -17,14 +16,16 @@ class _AddListingState extends State<AddListing> {
   final _formKey = GlobalKey<FormState>();
   String _itemName = '';
   String _description = '';
-  String _price = ''; // New state variable for price
+  String _price = '';
+  String _latitude = ''; // New state variable for latitude
+  String _longitude = ''; // New state variable for longitude
   File? _imageFile;
   bool _isLoading = false;
   final user = FirebaseAuth.instance.currentUser!;
   final locationsCollection = FirebaseFirestore.instance.collection('Locations');
   final ImagePicker _picker = ImagePicker();
 
-  /// Function to pick an image from the gallery
+  // Function to pick an image from the gallery
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
 
@@ -35,9 +36,22 @@ class _AddListingState extends State<AddListing> {
     }
   }
 
-  /// Function to add a new listing to Firestore
+  // Function to launch Google Maps for selecting a location
+  Future<void> _selectLocation() async {
+    const String googleMapsUrl = 'https://www.google.com/maps';
+    final Uri uri = Uri.parse(googleMapsUrl);
+    if (await canLaunch(uri.toString())) {
+      await launch(uri.toString());
+    } else {
+      throw 'Could not launch $googleMapsUrl';
+    }
+  }
+
+  // Function to add a new listing to Firestore
   Future<void> _addListing() async {
-    if (_formKey.currentState!.validate()) {
+    if (_formKey.currentState!.validate() &&
+        _latitude.isNotEmpty &&
+        _longitude.isNotEmpty) {
       setState(() {
         _isLoading = true; // Start loading
       });
@@ -60,6 +74,8 @@ class _AddListingState extends State<AddListing> {
         'price': double.parse(_price), // Store price as double
         'imageurl': imageUrl,
         'userId': user.uid,
+        'latitude': _latitude, // Save latitude
+        'longitude': _longitude, // Save longitude
         'timestamp': FieldValue.serverTimestamp(), // Optional: For sorting
       });
 
@@ -77,6 +93,11 @@ class _AddListingState extends State<AddListing> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => HomePage()),
+      );
+    } else {
+      // Show error message if location is not selected
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please select a location and enter coordinates')),
       );
     }
   }
@@ -153,6 +174,55 @@ class _AddListingState extends State<AddListing> {
                 onChanged: (value) {
                   setState(() {
                     _price = value;
+                  });
+                },
+              ),
+              SizedBox(height: 16),
+
+              // Select Location Button
+              ElevatedButton(
+                onPressed: _selectLocation,
+                child: Text('Find the Location (Open Maps)'),
+              ),
+              SizedBox(height: 16),
+
+              // Latitude Input Field
+              TextFormField(
+                decoration: InputDecoration(
+                  labelText: 'Latitude',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter latitude';
+                  }
+                  return null;
+                },
+                onChanged: (value) {
+                  setState(() {
+                    _latitude = value;
+                  });
+                },
+              ),
+              SizedBox(height: 16),
+
+              // Longitude Input Field
+              TextFormField(
+                decoration: InputDecoration(
+                  labelText: 'Longitude',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter longitude';
+                  }
+                  return null;
+                },
+                onChanged: (value) {
+                  setState(() {
+                    _longitude = value;
                   });
                 },
               ),
