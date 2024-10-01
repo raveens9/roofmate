@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:roofmate/pages/detailsPage.dart';
 import 'detailsPage.dart';
-
 class SavedPage extends StatelessWidget {
   final user = FirebaseAuth.instance.currentUser!;
 
@@ -11,7 +10,7 @@ class SavedPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Favorites'),
+        title: const Text('Favorites'),
       ),
       body: StreamBuilder(
         stream: FirebaseFirestore.instance
@@ -21,10 +20,14 @@ class SavedPage extends StatelessWidget {
             .snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
 
           final favoriteDocs = snapshot.data!.docs;
+
+          if (favoriteDocs.isEmpty) {
+            return const Center(child: Text('No favorites added.'));
+          }
 
           return ListView(
             children: favoriteDocs.map((doc) {
@@ -33,11 +36,11 @@ class SavedPage extends StatelessWidget {
                 future: FirebaseFirestore.instance.collection('Locations').doc(locationId).get(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
-                    return ListTile(title: Text('Loading...'));
+                    return const ListTile(title: Text('Loading...'));
                   }
 
                   final data = snapshot.data!.data() as Map<String, dynamic>;
-                  final String name = data['item'];
+                  final String name = data['item'] ?? 'No Name';
                   final String imageUrl = data['imageurl'] ?? '';
 
                   return Padding(
@@ -48,9 +51,7 @@ class SavedPage extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => detailsPage(
-                                documentId: locationId,
-                              ),
+                              builder: (context) => detailsPage(documentId: locationId),
                             ),
                           );
                         },
@@ -63,11 +64,11 @@ class SavedPage extends StatelessWidget {
                               width: double.infinity,
                               height: 150,
                               color: Colors.grey[300],
-                              child: Icon(Icons.image, color: Colors.grey[700]),
+                              child:  Icon(Icons.image, color: Colors.grey[700]),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child: Text(name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                              child: Text(name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                             ),
                           ],
                         ),

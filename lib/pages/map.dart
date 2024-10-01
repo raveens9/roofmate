@@ -30,9 +30,10 @@ class _MapPageState extends State<MapPage> {
           .doc(widget.documentId)
           .get();
 
-      if (locationSnapshot.exists) {
-        double latitude = double.parse(locationSnapshot.data()?['latitude']);
-        double longitude = double.parse(locationSnapshot.data()?['longitude']);
+      if (locationSnapshot.exists && locationSnapshot.data() != null) {
+        // Fetch latitude and longitude as double directly
+        double latitude = locationSnapshot.data()?['latitude'] ?? 0.0;
+        double longitude = locationSnapshot.data()?['longitude'] ?? 0.0;
 
         setState(() {
           _initialPosition = LatLng(latitude, longitude);
@@ -40,8 +41,8 @@ class _MapPageState extends State<MapPage> {
             markerId: MarkerId('locationMarker'),
             position: _initialPosition,
             infoWindow: InfoWindow(
-              title: locationSnapshot.data()?['item'], // Set the location name as title
-              snippet: locationSnapshot.data()?['description'], // Set the description as snippet
+              title: locationSnapshot.data()?['item'] ?? 'Unknown Item', // Set the location name as title
+              snippet: locationSnapshot.data()?['description'] ?? 'No description available', // Set the description as snippet
             ),
           );
           _isLoading = false; // Finished loading
