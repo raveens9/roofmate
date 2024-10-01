@@ -38,10 +38,10 @@ class MapDirection extends StatelessWidget {
             return Center(child: Text('Document does not exist'));
           }
 
-          final Map<String, dynamic> data = snapshot.data!.data()!;
-          final double latitude = double.parse(data['latitude']);
-          final double longitude = double.parse(data['longitude']);
-          final String locationName = data['item'] ?? 'Location';
+          final Map<String, dynamic>? data = snapshot.data!.data();
+          final double latitude = data?['latitude'] ?? 0.0; // No need for parsing
+          final double longitude = data?['longitude'] ?? 0.0; // No need for parsing
+          final String locationName = data?['item'] ?? 'Location';
 
           return Padding(
             padding: const EdgeInsets.all(16.0),
