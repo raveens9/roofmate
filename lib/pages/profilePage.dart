@@ -131,10 +131,6 @@ class _ProfilePageState extends State<ProfilePage> {
           return const Center(child: CircularProgressIndicator());
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _navigateToAddListing,
-        child: Icon(Icons.add),
-      ),
     );
   }
 }
