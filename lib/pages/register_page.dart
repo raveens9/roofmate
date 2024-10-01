@@ -54,6 +54,8 @@ class _RegisterPageState extends State<RegisterPage> {
             email: usernameController.text,
             password: passwordController.text);
 
+        String userId = userCredential.user!.uid;
+
         FirebaseFirestore.instance
             .collection('Users')
             .doc(userCredential.user?.email)
@@ -157,4 +159,3 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 }
-

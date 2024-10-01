@@ -1,8 +1,8 @@
-import 'package:url_launcher/url_launcher.dart'; // Import url_launcher
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:roofmate/pages/HomePage.dart';
 import 'dart:io';
@@ -17,8 +17,7 @@ class _AddListingState extends State<AddListing> {
   String _itemName = '';
   String _description = '';
   String _price = '';
-  String _latitude = ''; // New state variable for latitude
-  String _longitude = ''; // New state variable for longitude
+  LatLng? _selectedLocation;
   File? _imageFile;
   bool _isLoading = false;
   final user = FirebaseAuth.instance.currentUser!;
@@ -36,24 +35,11 @@ class _AddListingState extends State<AddListing> {
     }
   }
 
-  // Function to launch Google Maps for selecting a location
-  Future<void> _selectLocation() async {
-    const String googleMapsUrl = 'https://www.google.com/maps';
-    final Uri uri = Uri.parse(googleMapsUrl);
-    if (await canLaunch(uri.toString())) {
-      await launch(uri.toString());
-    } else {
-      throw 'Could not launch $googleMapsUrl';
-    }
-  }
-
   // Function to add a new listing to Firestore
   Future<void> _addListing() async {
-    if (_formKey.currentState!.validate() &&
-        _latitude.isNotEmpty &&
-        _longitude.isNotEmpty) {
+    if (_formKey.currentState!.validate() && _selectedLocation != null) {
       setState(() {
-        _isLoading = true; // Start loading
+        _isLoading = true;
       });
 
       String? imageUrl;
@@ -71,34 +57,44 @@ class _AddListingState extends State<AddListing> {
       await locationsCollection.add({
         'item': _itemName,
         'description': _description,
-        'price': double.parse(_price), // Store price as double
+        'price': double.parse(_price),
         'imageurl': imageUrl,
         'userId': user.uid,
-        'latitude': _latitude, // Save latitude
-        'longitude': _longitude, // Save longitude
-        'timestamp': FieldValue.serverTimestamp(), // Optional: For sorting
+        'latitude': _selectedLocation!.latitude, // Save selected latitude
+        'longitude': _selectedLocation!.longitude, // Save selected longitude
+        'timestamp': FieldValue.serverTimestamp(),
       });
 
       setState(() {
-        _isLoading = false; // Stop loading
+        _isLoading = false;
       });
 
-      // Show a success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Listing added successfully!')),
       );
 
-      // Navigate back to HomePage or previous page
       Navigator.pop(context);
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => HomePage()),
       );
     } else {
-      // Show error message if location is not selected
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please select a location and enter coordinates')),
+        SnackBar(content: Text('Please select a location')),
       );
+    }
+  }
+
+  // Function to open the map and allow location selection
+  Future<void> _selectLocationOnMap() async {
+    LatLng? pickedLocation = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MapScreen()),
+    );
+    if (pickedLocation != null) {
+      setState(() {
+        _selectedLocation = pickedLocation;
+      });
     }
   }
 
@@ -108,13 +104,12 @@ class _AddListingState extends State<AddListing> {
       appBar: AppBar(
         title: Text('Add Listing'),
       ),
-      body: SingleChildScrollView( // Prevent overflow when keyboard appears
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
-              // Item Name Field
               TextFormField(
                 decoration: InputDecoration(
                   labelText: 'Item Name',
@@ -133,14 +128,12 @@ class _AddListingState extends State<AddListing> {
                 },
               ),
               SizedBox(height: 16),
-
-              // Description Field
               TextFormField(
                 decoration: InputDecoration(
                   labelText: 'Description',
                   border: OutlineInputBorder(),
                 ),
-                maxLines: 3, // Allow multiple lines
+                maxLines: 3,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Please enter a description';
@@ -154,8 +147,6 @@ class _AddListingState extends State<AddListing> {
                 },
               ),
               SizedBox(height: 16),
-
-              // Price Field
               TextFormField(
                 decoration: InputDecoration(
                   labelText: 'Price (Rs.)',
@@ -178,87 +169,85 @@ class _AddListingState extends State<AddListing> {
                 },
               ),
               SizedBox(height: 16),
-
-              // Select Location Button
               ElevatedButton(
-                onPressed: _selectLocation,
-                child: Text('Find the Location (Open Maps)'),
+                onPressed: _selectLocationOnMap,
+                child: Text(_selectedLocation == null
+                    ? 'Select Location on Map'
+                    : 'Location Selected: (${_selectedLocation!.latitude}, ${_selectedLocation!.longitude})'),
               ),
               SizedBox(height: 16),
-
-              // Latitude Input Field
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Latitude',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter latitude';
-                  }
-                  return null;
-                },
-                onChanged: (value) {
-                  setState(() {
-                    _latitude = value;
-                  });
-                },
-              ),
-              SizedBox(height: 16),
-
-              // Longitude Input Field
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Longitude',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter longitude';
-                  }
-                  return null;
-                },
-                onChanged: (value) {
-                  setState(() {
-                    _longitude = value;
-                  });
-                },
-              ),
-              SizedBox(height: 16),
-
-              // Image Picker Section
               _imageFile == null
-                  ? Text(
-                'No image selected.',
-                style: TextStyle(color: Colors.grey),
-              )
-                  : Image.file(
-                _imageFile!,
-                height: 150,
-              ),
+                  ? Text('No image selected.', style: TextStyle(color: Colors.grey))
+                  : Image.file(_imageFile!, height: 150),
               SizedBox(height: 8),
               ElevatedButton.icon(
-                onPressed: _isLoading ? null : _pickImage, // Disable while loading
+                onPressed: _isLoading ? null : _pickImage,
                 icon: Icon(Icons.image),
                 label: Text('Select Image'),
               ),
               SizedBox(height: 24),
-
-              // Add Listing Button or Loading Indicator
               _isLoading
                   ? CircularProgressIndicator()
                   : ElevatedButton(
                 onPressed: _addListing,
                 child: Text('Add Listing'),
                 style: ElevatedButton.styleFrom(
-                  minimumSize: Size(double.infinity, 50), // Full-width button
+                  minimumSize: Size(double.infinity, 50),
                 ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class MapScreen extends StatefulWidget {
+  @override
+  _MapScreenState createState() => _MapScreenState();
+}
+
+class _MapScreenState extends State<MapScreen> {
+  LatLng? _pickedLocation;
+  GoogleMapController? _mapController;
+
+  void _selectLocation(LatLng position) {
+    setState(() {
+      _pickedLocation = position;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Select Location'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.check),
+            onPressed: _pickedLocation == null
+                ? null
+                : () {
+              Navigator.of(context).pop(_pickedLocation);
+            },
+          ),
+        ],
+      ),
+      body: GoogleMap(
+        initialCameraPosition: CameraPosition(
+          target: LatLng(6.9271, 79.8612), // Set initial position (Colombo, Sri Lanka)
+          zoom: 12,
+        ),
+        onTap: _selectLocation,
+        markers: _pickedLocation == null
+            ? {}
+            : {
+          Marker(
+            markerId: MarkerId('picked-location'),
+            position: _pickedLocation!,
+          ),
+        },
       ),
     );
   }

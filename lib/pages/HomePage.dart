@@ -71,7 +71,7 @@ class _HomePageState extends State<HomePage> {
           );
         },
         child: const Icon(Icons.add),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Colors.blue[200],
       )
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
@@ -221,7 +221,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                                         ),
                                       ),
-                                      const Icon(Icons.favorite_border, color: Colors.redAccent),
+                                      const Icon(Icons.favorite_border, color: Colors.blue),
                                     ],
                                   ),
                                 ),
