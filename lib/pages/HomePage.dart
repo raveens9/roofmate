@@ -119,6 +119,39 @@ class _ExplorePageState extends State<ExplorePage> {
   final TextEditingController searchController = TextEditingController();
   String searchQuery = "";
 
+  Future<bool> isFavorite(String listingId) async {
+    final favorite = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection('favorites')
+        .doc(listingId)
+        .get();
+
+    return favorite.exists;
+  }
+
+  void toggleFavorite(String listingId) async {
+    final docRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection('favorites')
+        .doc(listingId);
+
+    final docSnapshot = await docRef.get();
+
+    if (docSnapshot.exists) {
+      // Remove from favorites if already added
+      await docRef.delete();
+    } else {
+      // Add to favorites
+      await docRef.set({
+        'locationId': listingId,
+      });
+    }
+
+    setState(() {}); // Refresh the UI
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -154,7 +187,6 @@ class _ExplorePageState extends State<ExplorePage> {
                   final Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
                   final String name = data['item'].toString().toLowerCase();
                   final String description = data['description'].toString().toLowerCase();
-                  final String price = (data['price'] ?? '').toString().toLowerCase();
                   return name.contains(searchQuery) || description.contains(searchQuery);
                 }).toList();
 
@@ -167,97 +199,106 @@ class _ExplorePageState extends State<ExplorePage> {
                 final List<Widget> boardingWidgets = filteredDocs.map((DocumentSnapshot doc) {
                   final Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
                   final String name = data['item'] ?? 'No Name';
-                  final String description = data['description'] ?? 'No Description';
                   final String imageUrl = data['imageurl'] ?? '';
                   final String price = data['price']?.toString() ?? '0';
                   final String docId = doc.id;
 
-                  return Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => detailsPage(
-                              documentId: docId,
+                  return FutureBuilder<bool>(
+                    future: isFavorite(docId),
+                    builder: (context, snapshot) {
+                      bool isFav = snapshot.data ?? false;
+                      return Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => detailsPage(
+                                  documentId: docId,
+                                ),
+                              ),
+                            );
+                          },
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.0),
                             ),
-                          ),
-                        );
-                      },
-                      child: Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        elevation: 4,
-                        child: Stack(
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            elevation: 4,
+                            child: Stack(
                               children: [
-                                ClipRRect(
-                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                                  child: imageUrl.isNotEmpty
-                                      ? Image.network(
-                                    imageUrl,
-                                    width: double.infinity,
-                                    height: 150,
-                                    fit: BoxFit.cover,
-                                  )
-                                      : Container(
-                                    width: double.infinity,
-                                    height: 180,
-                                    color: Colors.grey[300],
-                                    child: const Icon(Icons.image, color: Colors.grey, size: 50),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          name,
-                                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                                        ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                                      child: imageUrl.isNotEmpty
+                                          ? Image.network(
+                                        imageUrl,
+                                        width: double.infinity,
+                                        height: 150,
+                                        fit: BoxFit.cover,
+                                      )
+                                          : Container(
+                                        width: double.infinity,
+                                        height: 180,
+                                        color: Colors.grey[300],
+                                        child: const Icon(Icons.image, color: Colors.grey, size: 50),
                                       ),
-                                      const Icon(Icons.favorite_border, color: Colors.blue),
-                                    ],
-                                  ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              name,
+                                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                            ),
+                                          ),
+                                          IconButton(
+                                            icon: Icon(
+                                              isFav ? Icons.favorite : Icons.favorite_border,
+                                              color: isFav ? Colors.red : Colors.blue,
+                                            ),
+                                            onPressed: () => toggleFavorite(docId),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        "Rs. $price per night",
+                                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    "Rs. $price per night",
-                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                Positioned(
+                                  bottom: 0,
+                                  right: 1,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      // Navigate to payment handler
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => PaymentHandler(hotel: data),
+                                        ),
+                                      );
+                                    },
+                                    child: const Text("Book Now"),
                                   ),
                                 ),
                               ],
                             ),
-                            Positioned(
-                              bottom: 0,
-                              right: 1,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  // Navigate to payment handler
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => PaymentHandler(hotel: data),
-                                    ),
-                                  );
-                                },
-                                child: const Text("Book Now"),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
+                      );
+                    },
                   );
                 }).toList();
-
-
 
                 return ListView(
                   children: boardingWidgets,
