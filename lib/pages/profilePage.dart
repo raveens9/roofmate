@@ -5,8 +5,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:roofmate/components/textBox.dart';
+import 'package:roofmate/pages/yourListingsPage.dart';
 import 'dart:io';
-
 import 'AddListingPage.dart'; // Ensure this file contains the AddListing widget
 
 class ProfilePage extends StatefulWidget {
@@ -67,10 +67,10 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  void _navigateToAddListing() {
+  void _navigateToYourListings() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => AddListing()),
+      MaterialPageRoute(builder: (context) => YourListings()),
     );
   }
 
@@ -110,8 +110,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 SizedBox(height: 20),
                 const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text("My Details"),
+                  padding: EdgeInsets.fromLTRB(17, 10, 10, 0),
+                  child: Text(
+                    "My Details",
+                    style: TextStyle(fontSize: 20),
+                  ),
                 ),
                 MyTextBox(
                   text: userData['username'],
@@ -131,6 +134,17 @@ class _ProfilePageState extends State<ProfilePage> {
           return const Center(child: CircularProgressIndicator());
         },
       ),
+      floatingActionButton: SizedBox(
+        width: 120,
+        height: 80,
+        child: FloatingActionButton(
+          onPressed: _navigateToYourListings,
+          child: Text("Your listings"),
+          backgroundColor: Colors.blue[200],
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.miniCenterFloat,
     );
   }
+
 }
