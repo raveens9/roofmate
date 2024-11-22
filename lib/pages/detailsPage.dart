@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:roofmate/pages/mapDirection.dart';
 import 'map.dart';
-
 class detailsPage extends StatelessWidget {
   final String documentId;
 
@@ -31,7 +30,8 @@ class detailsPage extends StatelessWidget {
           final String name = data['item'];
           final String description = data['description'];
           final String imageUrl = data['imageurl'];
-          final String userId = data['userId'];
+          final String phoneNo = data['phoneNo'];
+          final String username = data['username'];
 
           return Padding(
             padding: const EdgeInsets.all(16.0),
@@ -69,37 +69,15 @@ class detailsPage extends StatelessWidget {
                     style: TextStyle(fontSize: 16),
                     textAlign: TextAlign.justify,
                   ),
-                  SizedBox(height: 20),
-                  FutureBuilder<DocumentSnapshot>(
-                    future: FirebaseFirestore.instance.collection('Users').doc(userId).get(),
-                    builder: (context, userSnapshot) {
-                      if (userSnapshot.connectionState == ConnectionState.waiting) {
-                        return Text('Loading user information...');
-                      }
-                      if (userSnapshot.hasError) {
-                        return Text('Error loading user information: ${userSnapshot.error}');
-                      }
-                      if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
-                        return Text('User does not exist');
-                      }
-
-                      final userData = userSnapshot.data!.data() as Map<String, dynamic>;
-                      final String userName = userData['name'];
-
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 10),
-                        child: Row(
-                          children: [
-                            Icon(Icons.person, color: Colors.blue),
-                            SizedBox(width: 8),
-                            Text(
-                              'Added by: $userName',
-                              style: TextStyle(fontStyle: FontStyle.italic, fontSize: 16),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                  Text(
+                    phoneNo,
+                    style: TextStyle(fontSize: 16),
+                    textAlign: TextAlign.justify,
+                  ),
+                  Text(
+                    username,
+                    style: TextStyle(fontSize: 16),
+                    textAlign: TextAlign.justify,
                   ),
                   SizedBox(height: 20),
                   Row(
@@ -137,6 +115,7 @@ class detailsPage extends StatelessWidget {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
                       ),
+                      // Text(data)
                     ],
                   ),
                 ],

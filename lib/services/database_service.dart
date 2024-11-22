@@ -22,7 +22,7 @@ class DatabaseService {
   }
 
   void _setupCollectionReferences() {
-    _usersCollection = _firebaseFirestore.collection('Users').withConverter<UserProfile>(
+    _usersCollection = _firebaseFirestore.collection('users').withConverter<UserProfile>(
       fromFirestore: (snapshot, _) => UserProfile.fromJson(snapshot.data()!),
       toFirestore: (userProfile, _) => userProfile.toJson(),
     );

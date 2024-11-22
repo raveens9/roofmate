@@ -22,8 +22,10 @@ class _AddListingState extends State<AddListing> {
   bool _isLoading = false;
   final user = FirebaseAuth.instance.currentUser!;
   final locationsCollection = FirebaseFirestore.instance.collection('Locations');
+  final usersCollection = FirebaseFirestore.instance.collection('Users');
   final ImagePicker _picker = ImagePicker();
 
+  // Function to pick an image
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
 
@@ -36,11 +38,16 @@ class _AddListingState extends State<AddListing> {
 
   // Function to add a new listing to Firestore
   Future<void> _addListing() async {
-    if (_formKey.currentState!.validate() && _selectedLocation != null) {
+    if (_formKey.currentState!.validate() && _selectedLocation != null && _imageFile != null) {
       setState(() {
         _isLoading = true;
       });
 
+      DocumentSnapshot userDoc = await usersCollection.doc(user.uid).get();
+
+      // Extract the phone number and display name
+      String? phoneNo = userDoc['phoneNo'];
+      String? displayName = userDoc['displayName'];
       String? imageUrl;
 
       if (_imageFile != null) {
@@ -59,11 +66,12 @@ class _AddListingState extends State<AddListing> {
         'price': double.parse(_price),
         'imageurl': imageUrl,
         'userId': user.uid,
-        'latitude': _selectedLocation!.latitude, // Save selected latitude
-        'longitude': _selectedLocation!.longitude, // Save selected longitude
+        'phoneNo': phoneNo,
+        'username': displayName,
+        'latitude': _selectedLocation!.latitude,
+        'longitude': _selectedLocation!.longitude,
         'timestamp': FieldValue.serverTimestamp(),
       });
-
       setState(() {
         _isLoading = false;
       });
@@ -79,7 +87,7 @@ class _AddListingState extends State<AddListing> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please select a location')),
+        SnackBar(content: Text('Please select an image and location')),
       );
     }
   }
@@ -188,7 +196,7 @@ class _AddListingState extends State<AddListing> {
               _isLoading
                   ? CircularProgressIndicator()
                   : ElevatedButton(
-                onPressed: _addListing,
+                onPressed: _imageFile == null ? null : _addListing,
                 child: Text('Add Listing'),
                 style: ElevatedButton.styleFrom(
                   minimumSize: Size(double.infinity, 50),

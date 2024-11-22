@@ -75,6 +75,15 @@ class _RegisterPageState extends State<RegisterPage> {
           'phoneNo': phoneNumberController.text,
         });
 
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredential.user!.email)
+            .set({
+          'name': displayNameController.text, // Include userId in Firestore document
+          'pfpURL':"",
+          'uid': userId,
+        });
+
         Navigator.pop(context); // Close the loading dialog
       } else {
         Navigator.pop(context); // Close the loading dialog
