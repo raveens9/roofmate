@@ -1,6 +1,7 @@
 // lib/pages/payment_handler.dart
 
 import 'package:flutter/material.dart';
+import 'package:roofmate/pages/HomePage.dart';
 
 class PaymentHandler extends StatelessWidget {
   final Map<String, dynamic> hotel;
@@ -55,7 +56,15 @@ class PaymentHandler extends StatelessWidget {
                     content: Text("Thank you for booking ${hotel['item']}!"),
                     actions: [
                       TextButton(
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () {
+                          // Navigate to payment handler
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => HomePage()
+                            ),
+                          );
+                        },
                         child: Text("OK"),
                       ),
                     ],

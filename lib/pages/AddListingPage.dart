@@ -24,7 +24,6 @@ class _AddListingState extends State<AddListing> {
   final locationsCollection = FirebaseFirestore.instance.collection('Locations');
   final ImagePicker _picker = ImagePicker();
 
-  // Function to pick an image from the gallery
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
 

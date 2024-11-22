@@ -110,7 +110,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 SizedBox(height: 20),
                 const Padding(
-                  padding: EdgeInsets.fromLTRB(17, 10, 10, 0),
+                  padding: EdgeInsets.fromLTRB(17, 0, 10, 0),
                   child: Text(
                     "My Details",
                     style: TextStyle(fontSize: 20),
@@ -126,6 +126,11 @@ class _ProfilePageState extends State<ProfilePage> {
                   sectionName: 'Bio',
                   onPressed: () => editField('bio'),
                 ),
+                MyTextBox(
+                  text: userData['phoneNo'],
+                  sectionName: 'Mobile Number',
+                  onPressed: () => editField('phoneNo'),
+                ),
               ],
             );
           } else if (snapshot.hasError) {
@@ -134,13 +139,16 @@ class _ProfilePageState extends State<ProfilePage> {
           return const Center(child: CircularProgressIndicator());
         },
       ),
-      floatingActionButton: SizedBox(
-        width: 120,
-        height: 80,
-        child: FloatingActionButton(
-          onPressed: _navigateToYourListings,
-          child: Text("Your listings"),
-          backgroundColor: Colors.blue[200],
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.all(20),
+        child: SizedBox(
+          width: 120,
+          height: 60,
+          child: FloatingActionButton(
+            onPressed: _navigateToYourListings,
+            child: Text("Your listings"),
+            backgroundColor: Colors.blue[200],
+          ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniCenterFloat,

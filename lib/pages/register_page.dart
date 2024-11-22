@@ -17,6 +17,8 @@ class _RegisterPageState extends State<RegisterPage> {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+  final phoneNumberController = TextEditingController();
+  final displayNameController = TextEditingController();
 
   void wrongEmailMessage(){
     showDialog(
@@ -60,8 +62,9 @@ class _RegisterPageState extends State<RegisterPage> {
             .collection('Users')
             .doc(userCredential.user?.email)
             .set({
-          'username': usernameController.text.split('@')[0],
-          'bio':'Tell us about yourself'
+          'username': displayNameController.text,
+          'bio':'Tell us about yourself',
+          'phoneNo':phoneNumberController.text
         });
       }
       else
@@ -85,8 +88,6 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,10 +96,10 @@ class _RegisterPageState extends State<RegisterPage> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              SizedBox(height: 60,),
+              SizedBox(height: 30,),
               Image(image: AssetImage('assets/logo.png'),width: 300,),
 
-              const SizedBox(height: 60),
+              const SizedBox(height: 20),
 
               Text(
                 'Welcome!',
@@ -114,14 +115,14 @@ class _RegisterPageState extends State<RegisterPage> {
                 controller: usernameController, hintText: 'Email Address', obscureText: false,
               ),
 
-              SizedBox(height: 30),
+              SizedBox(height: 20),
 
               MyTextField(
                 controller: passwordController,
                 hintText: 'Password',
                 obscureText: true,
               ),
-              SizedBox(height: 30),
+              SizedBox(height: 20),
 
               MyTextField(
                 controller: confirmPasswordController,
@@ -129,8 +130,23 @@ class _RegisterPageState extends State<RegisterPage> {
                 obscureText: true,
               ),
 
-              const SizedBox(height: 70,),
+              SizedBox(height: 20),
 
+              MyTextField(
+                controller: displayNameController,
+                hintText: 'Display Name (for users to identify you)',
+                obscureText: false,
+              ),
+
+              SizedBox(height: 20),
+
+              MyTextField(
+                controller: phoneNumberController,
+                hintText: 'Phone Number',
+                obscureText: false,
+              ),
+
+              const SizedBox(height: 50,),
 
               MyButton(
                 onTap: signUserUp,
