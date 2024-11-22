@@ -42,51 +42,54 @@ class _RegisterPageState extends State<RegisterPage> {
       },
     );
   }
-  void signUserUp() async{
-
-    showDialog(context: context, builder: (context){
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    });
+  void signUserUp() async {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
 
     try {
-      if(passwordController.text==confirmPasswordController.text){
-        UserCredential userCredential= await FirebaseAuth.instance.createUserWithEmailAndPassword(
-            email: usernameController.text,
-            password: passwordController.text);
+      if (passwordController.text == confirmPasswordController.text) {
+        // Create the user with Firebase Authentication
+        UserCredential userCredential = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(
+          email: usernameController.text,
+          password: passwordController.text,
+        );
 
+        // Get the user's unique ID
         String userId = userCredential.user!.uid;
 
-        FirebaseFirestore.instance
+        // Add user details to Firestore, including the userId
+        await FirebaseFirestore.instance
             .collection('Users')
-            .doc(userCredential.user?.email)
+            .doc(userCredential.user!.email)
             .set({
+          'userId': userId, // Include userId in Firestore document
           'username': displayNameController.text,
-          'bio':'Tell us about yourself',
-          'phoneNo':phoneNumberController.text
+          'bio': 'Tell us about yourself',
+          'phoneNo': phoneNumberController.text,
         });
-      }
-      else
-      {
+
+        Navigator.pop(context); // Close the loading dialog
+      } else {
+        Navigator.pop(context); // Close the loading dialog
         wrongPasswordMessage();
       }
-      Navigator.pop(context);
-
-    } on FirebaseAuthException catch (e)
-
-    {
-      Navigator.pop(context);
-      if(e.code=='user-not-found')
-      {
+    } on FirebaseAuthException catch (e) {
+      Navigator.pop(context); // Close the loading dialog
+      if (e.code == 'user-not-found') {
         wrongEmailMessage();
-      }
-      else if(e.code=='wrong-password')
-      {
+      } else if (e.code == 'wrong-password') {
         wrongPasswordMessage();
       }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

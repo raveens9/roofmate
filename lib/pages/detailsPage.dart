@@ -71,7 +71,7 @@ class detailsPage extends StatelessWidget {
                   ),
                   SizedBox(height: 20),
                   FutureBuilder<DocumentSnapshot>(
-                    future: FirebaseFirestore.instance.collection('users').doc(userId).get(),
+                    future: FirebaseFirestore.instance.collection('Users').doc(userId).get(),
                     builder: (context, userSnapshot) {
                       if (userSnapshot.connectionState == ConnectionState.waiting) {
                         return Text('Loading user information...');

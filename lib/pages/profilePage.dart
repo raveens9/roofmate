@@ -7,7 +7,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:roofmate/components/textBox.dart';
 import 'package:roofmate/pages/yourListingsPage.dart';
 import 'dart:io';
-import 'AddListingPage.dart'; // Ensure this file contains the AddListing widget
 
 class ProfilePage extends StatefulWidget {
   @override
