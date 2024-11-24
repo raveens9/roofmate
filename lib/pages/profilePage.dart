@@ -100,7 +100,6 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile Page'),
-        backgroundColor: Colors.blue[100],
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: usersCollection.doc(user.uid).snapshots(),
@@ -122,10 +121,14 @@ class _ProfilePageState extends State<ProfilePage> {
                       image: profilePictureUrl.isNotEmpty
                           ? DecorationImage(
                               image: NetworkImage(profilePictureUrl),
-                              fit: BoxFit.contain, // Ensures the image is fully visible
+                              fit: BoxFit.contain,
                             )
                           : null,
-                      color: Colors.grey[300], // Placeholder background color
+                      color: Colors.grey[300],
+                      border: Border.all(
+                        color: Colors.grey,
+                        width: 3
+                      )
                     ),
                     child: profilePictureUrl.isEmpty
                         ? Icon(Icons.person, size: 50, color: Colors.grey[700])
@@ -139,12 +142,20 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 SizedBox(height: 20),
                 const Padding(
-                  padding: EdgeInsets.fromLTRB(17, 0, 10, 0),
+                  padding: EdgeInsets.fromLTRB(17, 0, 10, 10),
                   child: Text(
                     "My Details",
-                    style: TextStyle(fontSize: 20),
+                    style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
                   ),
                 ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(15,0,0,0),
+                  child: Text(
+                    'Let others get to know you better!',
+
+                  ),
+                ),
+                SizedBox(height: 20),
                 MyTextBox(
                   text: userData['username'],
                   sectionName: 'Name',

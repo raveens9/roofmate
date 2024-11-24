@@ -18,8 +18,8 @@ class MyTextBox extends StatelessWidget {
           color: Colors.grey[300],
           borderRadius: BorderRadius.circular(10)
       ),
-      padding: EdgeInsets.all(10),
-      margin: EdgeInsets.all(10),
+      padding: EdgeInsets.fromLTRB(10,0,10,10),
+      margin: EdgeInsets.fromLTRB(10,0,10,10),
 
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

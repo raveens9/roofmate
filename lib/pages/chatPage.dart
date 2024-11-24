@@ -47,7 +47,7 @@ class _ChatpageState extends State<Chatpage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Messages"),
-        backgroundColor: Colors.blue[100], 
+        backgroundColor: Colors.blue[200],
       ),
       body: _buildUI(),
     );
@@ -69,7 +69,8 @@ class _ChatpageState extends State<Chatpage> {
             vertical: 20.0,
           ),
           child: Column(
-            children: [
+            children: [Text('Manage your stays and visits here!'),
+              SizedBox(height: 20,),
               TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
