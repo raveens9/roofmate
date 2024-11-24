@@ -3,13 +3,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:roofmate/pages/chatPage.dart';
-import 'package:roofmate/pages/savedPage.dart';
+import 'package:roofmate/pages/AddListingPage.dart';
 import 'package:roofmate/pages/ProfilePage.dart';
+import 'package:roofmate/pages/chatPage.dart';
 import 'package:roofmate/pages/detailsPage.dart';
 import 'package:roofmate/pages/AddListingPage.dart';
 import 'package:roofmate/pages/payment_handler.dart';
 import 'filterPage.dart'; // Import the payment handler
+import 'package:roofmate/pages/payment_handler.dart'; // Import the payment handler
+import 'package:roofmate/pages/savedPage.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -219,6 +222,7 @@ class _ExplorePageState extends State<ExplorePage> {
                     });
                   },
                 ),
+
               ),
               IconButton(
                 icon: const Icon(Icons.filter_list),
@@ -349,6 +353,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                       ),
                                       child: const Text("Book Now"),
                                     ),
+
                                   ),
                                 ],
                               ),
