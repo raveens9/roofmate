@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -69,6 +68,7 @@ class _AddListingState extends State<AddListing> {
         'latitude': _selectedLocation!.latitude,
         'longitude': _selectedLocation!.longitude,
         'timestamp': FieldValue.serverTimestamp(),
+        'username': username
       });
       setState(() {
         _isLoading = false;
