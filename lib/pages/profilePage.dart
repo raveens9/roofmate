@@ -81,7 +81,7 @@ class _ProfilePageState extends State<ProfilePage> {
         backgroundColor: Colors.blue[100],
       ),
       body: StreamBuilder<DocumentSnapshot>(
-        stream: usersCollection.doc(user.email).snapshots(),
+        stream: usersCollection.doc(user.uid).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final userData = snapshot.data!.data() as Map<String, dynamic>;
