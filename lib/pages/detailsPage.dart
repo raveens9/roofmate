@@ -83,6 +83,20 @@ class detailsPage extends StatelessWidget {
                     textAlign: TextAlign.justify,
                   ),
                   SizedBox(height: 20),
+                  Text(
+                    description,
+                    style: TextStyle(fontSize: 16),
+                    textAlign: TextAlign.justify,
+                  ),
+
+                  SizedBox(height: 20),
+                  Text(
+                    description,
+                    style: TextStyle(fontSize: 16),
+                    textAlign: TextAlign.justify,
+                  ),
+
+                  SizedBox(height: 20),
                   Column(
                     children: [Padding(
                       padding: const EdgeInsets.fromLTRB(0, 10, 0, 30),

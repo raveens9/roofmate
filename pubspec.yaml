@@ -44,7 +44,7 @@ dependencies:
   google_fonts: ^6.2.1
   delightful_toast: ^1.1.0
   get_it: ^7.7.0
-  image_picker: ^1.1.2
+  image_picker: ^0.8.5+3
   path: ^1.8.3 
   google_maps_flutter: ^2.9.0
   geolocator: ^13.0.1
