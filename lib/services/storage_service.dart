@@ -17,7 +17,9 @@ class StorageService{
       return task.then((p){
         if (p.state == TaskState.success){
           return fileRef.getDownloadURL();
-      }
+      } else {
+      return null; // Handle failure if needed
+    }
       }
       );
   }

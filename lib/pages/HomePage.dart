@@ -3,12 +3,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:roofmate/pages/chatPage.dart';
-import 'package:roofmate/pages/savedPage.dart';
-import 'package:roofmate/pages/ProfilePage.dart';
-import 'package:roofmate/pages/detailsPage.dart';
 import 'package:roofmate/pages/AddListingPage.dart';
+import 'package:roofmate/pages/ProfilePage.dart';
+import 'package:roofmate/pages/chatPage.dart';
+import 'package:roofmate/pages/detailsPage.dart';
 import 'package:roofmate/pages/payment_handler.dart'; // Import the payment handler
+import 'package:roofmate/pages/savedPage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -140,10 +140,8 @@ class _ExplorePageState extends State<ExplorePage> {
     final docSnapshot = await docRef.get();
 
     if (docSnapshot.exists) {
-      // Remove from favorites if already added
       await docRef.delete();
     } else {
-      // Add to favorites
       await docRef.set({
         'locationId': listingId,
       });
@@ -287,7 +285,12 @@ class _ExplorePageState extends State<ExplorePage> {
                                           builder: (context) => PaymentHandler(hotel: data),
                                         ),
                                       );
-                                    },
+                                    },style: ElevatedButton.styleFrom(
+                                    side: const BorderSide(
+                                      color: Colors.grey,
+                                      width: 3
+                                    )
+                                  ),
                                     child: const Text("Book Now"),
                                   ),
                                 ),

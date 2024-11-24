@@ -1,11 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:roofmate/pages/HomePage.dart';
-import 'dart:io';
 
 class AddListing extends StatefulWidget {
   @override
@@ -45,9 +46,7 @@ class _AddListingState extends State<AddListing> {
 
       DocumentSnapshot userDoc = await usersCollection.doc(user.uid).get();
 
-      // Extract the phone number and display name
-      String? phoneNo = userDoc['phoneNo'];
-      String? displayName = userDoc['displayName'];
+      // Extract the phone number and display nam
       String? imageUrl;
 
       if (_imageFile != null) {
@@ -66,8 +65,6 @@ class _AddListingState extends State<AddListing> {
         'price': double.parse(_price),
         'imageurl': imageUrl,
         'userId': user.uid,
-        'phoneNo': phoneNo,
-        'username': displayName,
         'latitude': _selectedLocation!.latitude,
         'longitude': _selectedLocation!.longitude,
         'timestamp': FieldValue.serverTimestamp(),
