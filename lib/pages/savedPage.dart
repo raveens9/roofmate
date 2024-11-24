@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:roofmate/pages/detailsPage.dart';
-import 'detailsPage.dart';
+
 class SavedPage extends StatelessWidget {
   final user = FirebaseAuth.instance.currentUser!;
 
@@ -10,7 +10,8 @@ class SavedPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Favorites'),
+        title: const Text("Your Favorites"),
+        backgroundColor: Colors.blue[200],
       ),
       body: StreamBuilder(
         stream: FirebaseFirestore.instance
@@ -26,7 +27,20 @@ class SavedPage extends StatelessWidget {
           final favoriteDocs = snapshot.data!.docs;
 
           if (favoriteDocs.isEmpty) {
-            return const Center(child: Text('No favorites added.'));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Image(image: AssetImage('assets/save.jpg'), width: 300),
+                  const SizedBox(height: 20), // Space between the image and the text
+                  const Text(
+                    'No favorites added. Yet :)',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            );
           }
 
           return ListView(

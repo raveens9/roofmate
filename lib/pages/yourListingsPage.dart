@@ -8,7 +8,6 @@ import 'package:roofmate/pages/savedPage.dart';
 import 'package:roofmate/pages/ProfilePage.dart';
 import 'package:roofmate/pages/detailsPage.dart';
 import 'package:roofmate/pages/AddListingPage.dart';
-import 'package:roofmate/pages/payment_handler.dart'; // Import the payment handler
 
 class YourListings extends StatefulWidget {
   const YourListings({super.key});
@@ -82,22 +81,63 @@ class _ExplorePageState extends State<ExplorePage> {
       children: [
         Expanded(
           child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance.collection('Locations').snapshots(),
+            stream: FirebaseFirestore.instance
+                .collection('Locations')
+                .where('userId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+                .snapshots(),
             builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
               if (streamSnapshot.hasData) {
                 final List<DocumentSnapshot> boardingDocs = streamSnapshot.data!.docs;
 
+                // Apply any additional filtering based on search query
                 final List<DocumentSnapshot> filteredDocs = boardingDocs.where((doc) {
                   final Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
                   final String name = data['item'].toString().toLowerCase();
                   final String description = data['description'].toString().toLowerCase();
-                  final String price = (data['price'] ?? '').toString().toLowerCase();
                   return name.contains(searchQuery) || description.contains(searchQuery);
                 }).toList();
 
                 if (filteredDocs.isEmpty) {
-                  return const Center(
-                    child: Text('No listings found.'),
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(height: 230),
+                        Image(image: AssetImage('assets/profile.jpg'), width: 300),
+                        const SizedBox(height: 20), // Space between the image and the text
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(15,0,15,0),
+                          child: const Text(
+                            'You don\'t have any listings. Time to get started!',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        SizedBox(height: 160),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 0, 0, 50),
+                          child: Container(
+                            width: 100, // Custom width
+                            height: 40, // Custom height
+                            child: FloatingActionButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => AddListing()),
+                                );
+                              },
+                              child: const Text(
+                                'Add Listing',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                              ),
+                              backgroundColor: Colors.blue[200],
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
                   );
                 }
 
@@ -110,7 +150,7 @@ class _ExplorePageState extends State<ExplorePage> {
                   final String docId = doc.id;
 
                   return Padding(
-                    padding: const EdgeInsets.fromLTRB(10,30,10,10),
+                    padding: const EdgeInsets.fromLTRB(10, 30, 10, 10),
                     child: GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -149,7 +189,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                   ),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                                  padding: const EdgeInsets.fromLTRB(8, 10, 8, 10),
                                   child: Row(
                                     children: [
                                       Expanded(
@@ -162,13 +202,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                     ],
                                   ),
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    "Rs. $price per night",
-                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                  ),
-                                ),
+
                               ],
                             )
                           ],
@@ -177,8 +211,6 @@ class _ExplorePageState extends State<ExplorePage> {
                     ),
                   );
                 }).toList();
-
-
 
                 return ListView(
                   children: boardingWidgets,

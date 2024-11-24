@@ -26,8 +26,42 @@ class _HomePageState extends State<HomePage> {
   final searchController = TextEditingController();
   int _selectedIndex = 0;
 
-  void signUserOut() {
-    FirebaseAuth.instance.signOut();
+  void signUserOut(BuildContext context) async {
+    // Show the confirmation dialog
+    bool confirmLogout = await showLogoutConfirmationDialog(context);
+
+    // If the user confirms, log them out
+    if (confirmLogout) {
+      FirebaseAuth.instance.signOut();
+    }
+  }
+
+// Function to show the confirmation dialog
+  Future<bool> showLogoutConfirmationDialog(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false, // Prevent dismissing the dialog by tapping outside
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Log Out'),
+          content: const Text('Are you sure you want to log out?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            TextButton(
+              child: const Text('Yes'),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    ).then((value) => value ?? false);
   }
 
   void _onItemTapped(int index) {
@@ -52,14 +86,17 @@ class _HomePageState extends State<HomePage> {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 30,
-            color: Colors.deepPurple, // Dark purple
-            fontFamily: 'Futura Bold font', // Use the custom font family
+            color: Colors.black, // Dark purple
+            fontFamily: 'SF-Pro', // Use the custom font family
           ),
         ),
 
         backgroundColor: Colors.blue[100],
         actions: [
-          IconButton(onPressed: signUserOut, icon: const Icon(Icons.logout))
+          IconButton(
+            onPressed: () => signUserOut(context),
+            icon: const Icon(Icons.logout),
+          )
         ],
       ),
       body: Column(
@@ -181,12 +218,10 @@ class _ExplorePageState extends State<ExplorePage> {
       final data = doc.data() as Map<String, dynamic>;
       final price = int.tryParse(data['price']?.toString() ?? "0") ?? 0;
 
-      // Apply price filter
       if (filters['priceRange'] == "<5000" && price >= 5000) return false;
       if (filters['priceRange'] == "5000-10000" && (price < 5000 || price > 10000)) return false;
       if (filters['priceRange'] == ">10000" && price <= 10000) return false;
 
-      // Apply location filter
       if (filters['location'] != null && filters['location']!.isNotEmpty) {
         final location = data['location']?.toString().toLowerCase() ?? '';
         if (!location.contains(filters['location']!.toString().toLowerCase())) return false;
@@ -199,7 +234,13 @@ class _ExplorePageState extends State<ExplorePage> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [
+      children: [Padding(
+        padding: const EdgeInsets.fromLTRB(5,15,5,15),
+        child: Text('Your home away from home is just a few taps away!',
+          style:
+          TextStyle(fontSize: 16,
+          fontWeight: FontWeight.bold),),
+      ),
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
