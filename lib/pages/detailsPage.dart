@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:roofmate/pages/mapDirection.dart';
 import 'map.dart';
+import 'package:roofmate/pages/posterDetailsPage.dart';
+
 class detailsPage extends StatelessWidget {
   final String documentId;
 
@@ -27,9 +29,11 @@ class detailsPage extends StatelessWidget {
           }
 
           final Map<String, dynamic> data = snapshot.data!.data() as Map<String, dynamic>;
+          final String userId = data['userId']; // Fetch the userId
           final String name = data['item'];
           final String description = data['description'];
           final String imageUrl = data['imageurl'];
+
 
           return Padding(
             padding: const EdgeInsets.all(16.0),
@@ -68,17 +72,17 @@ class detailsPage extends StatelessWidget {
                     textAlign: TextAlign.justify,
                   ),
                   SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton.icon(
-                        icon: Icon(Icons.map),
-                        label: Text('Maps'),
+                  Column(
+                    children: [Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 10, 0, 30),
+                      child: ElevatedButton.icon(
+                        icon: Icon(Icons.person),
+                        label: Text('Contact Owner'),
                         onPressed: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => MapPage(documentId: documentId),
+                              builder: (context) => PosterDetailsPage(userId: userId),
                             ),
                           );
                         },
@@ -87,23 +91,45 @@ class detailsPage extends StatelessWidget {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
                       ),
-                      ElevatedButton.icon(
-                        icon: Icon(Icons.directions),
-                        label: Text('Get Directions'),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MapDirection(documentId: documentId),
+                    ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          ElevatedButton.icon(
+                            icon: Icon(Icons.map),
+                            label: Text('Maps'),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => MapPage(documentId: documentId),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
+                          ),
+                          ElevatedButton.icon(
+                            icon: Icon(Icons.directions),
+                            label: Text('Get Directions'),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => MapDirection(documentId: documentId),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                          ),
+                          // Text(data)
+                        ],
                       ),
-                      // Text(data)
                     ],
                   ),
                 ],

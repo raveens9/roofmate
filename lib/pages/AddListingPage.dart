@@ -23,6 +23,7 @@ class _AddListingState extends State<AddListing> {
   final user = FirebaseAuth.instance.currentUser!;
   final locationsCollection = FirebaseFirestore.instance.collection('Locations');
   final usersCollection = FirebaseFirestore.instance.collection('Users');
+  final username = FirebaseFirestore.instance.collection('Users').doc();
   final ImagePicker _picker = ImagePicker();
 
   // Function to pick an image
@@ -115,12 +116,12 @@ class _AddListingState extends State<AddListing> {
             children: [
               TextFormField(
                 decoration: InputDecoration(
-                  labelText: 'Item Name',
+                  labelText: 'Enter the location of your listing',
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Please enter an item name';
+                    return 'Please enter the listing name';
                   }
                   return null;
                 },
@@ -133,13 +134,16 @@ class _AddListingState extends State<AddListing> {
               SizedBox(height: 16),
               TextFormField(
                 decoration: InputDecoration(
-                  labelText: 'Description',
+                  labelText: 'Add a brief description about your property (Minimum of 20 characters)',
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 3,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Please enter a description';
+                  }
+                  if (value.trim().length < 2) {
+                    return 'Description must be at least 20 characters long';
                   }
                   return null;
                 },
@@ -152,10 +156,9 @@ class _AddListingState extends State<AddListing> {
               SizedBox(height: 16),
               TextFormField(
                 decoration: InputDecoration(
-                  labelText: 'Price (Rs.)',
+                  labelText: 'Rent fee (Rs.)',
                   border: OutlineInputBorder(),
                 ),
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Please enter a price';
@@ -193,7 +196,7 @@ class _AddListingState extends State<AddListing> {
                   ? CircularProgressIndicator()
                   : ElevatedButton(
                 onPressed: _imageFile == null ? null : _addListing,
-                child: Text('Add Listing'),
+                child: Text('Add Listing!'),
                 style: ElevatedButton.styleFrom(
                   minimumSize: Size(double.infinity, 50),
                 ),
