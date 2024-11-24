@@ -99,8 +99,9 @@ class _RegisterPageState extends State<RegisterPage> {
       if (profilePicURL != null) {
         // Add user details to Firestore (Users collection) with 'uid' as the document ID
         await FirebaseFirestore.instance
-            .collection('Users') // This is for the owner collection
-            .doc(userId) // Using 'uid' as the document ID
+            .collection('Users')
+            .doc(userCredential.user!.uid)
+
             .set({
           'userId': userId,
           'username': displayNameController.text,
