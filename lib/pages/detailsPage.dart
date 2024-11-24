@@ -30,8 +30,6 @@ class detailsPage extends StatelessWidget {
           final String name = data['item'];
           final String description = data['description'];
           final String imageUrl = data['imageurl'];
-          final String phoneNo = data['phoneNo'];
-          final String username = data['username'];
 
           return Padding(
             padding: const EdgeInsets.all(16.0),
@@ -66,16 +64,6 @@ class detailsPage extends StatelessWidget {
                   SizedBox(height: 10),
                   Text(
                     description,
-                    style: TextStyle(fontSize: 16),
-                    textAlign: TextAlign.justify,
-                  ),
-                  Text(
-                    phoneNo,
-                    style: TextStyle(fontSize: 16),
-                    textAlign: TextAlign.justify,
-                  ),
-                  Text(
-                    username,
                     style: TextStyle(fontSize: 16),
                     textAlign: TextAlign.justify,
                   ),

@@ -45,9 +45,7 @@ class _AddListingState extends State<AddListing> {
 
       DocumentSnapshot userDoc = await usersCollection.doc(user.uid).get();
 
-      // Extract the phone number and display name
-      String? phoneNo = userDoc['phoneNo'];
-      String? displayName = userDoc['displayName'];
+      // Extract the phone number and display nam
       String? imageUrl;
 
       if (_imageFile != null) {
@@ -66,8 +64,6 @@ class _AddListingState extends State<AddListing> {
         'price': double.parse(_price),
         'imageurl': imageUrl,
         'userId': user.uid,
-        'phoneNo': phoneNo,
-        'username': displayName,
         'latitude': _selectedLocation!.latitude,
         'longitude': _selectedLocation!.longitude,
         'timestamp': FieldValue.serverTimestamp(),

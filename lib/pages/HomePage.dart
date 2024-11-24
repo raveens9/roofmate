@@ -140,10 +140,8 @@ class _ExplorePageState extends State<ExplorePage> {
     final docSnapshot = await docRef.get();
 
     if (docSnapshot.exists) {
-      // Remove from favorites if already added
       await docRef.delete();
     } else {
-      // Add to favorites
       await docRef.set({
         'locationId': listingId,
       });
@@ -287,7 +285,12 @@ class _ExplorePageState extends State<ExplorePage> {
                                           builder: (context) => PaymentHandler(hotel: data),
                                         ),
                                       );
-                                    },
+                                    },style: ElevatedButton.styleFrom(
+                                    side: const BorderSide(
+                                      color: Colors.grey,
+                                      width: 3
+                                    )
+                                  ),
                                     child: const Text("Book Now"),
                                   ),
                                 ),
