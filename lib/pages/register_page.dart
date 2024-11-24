@@ -66,85 +66,84 @@ class _RegisterPageState extends State<RegisterPage> {
 
 
   void signUserUp() async {
-  showDialog(
-    context: context,
-    builder: (context) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    },
-  );
-
-  try {
-    if (passwordController.text == confirmPasswordController.text) {
-      // Create the user with Firebase Authentication
-      UserCredential userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(
-        email: usernameController.text,
-        password: passwordController.text,
-      );
-
-      // Get the user's unique ID
-      String userId = userCredential.user!.uid;
-
-      // Load the default profile picture
-      final File defaultProfilePicFile = await getDefaultProfilePicFile();
-
-      // Upload default profile picture to Firebase Storage
-      String? profilePicURL = await StorageService().uploadUserPfp(
-        file: defaultProfilePicFile,
-        uid: userId,
-      );
-
-      if (profilePicURL != null) {
-        // Add user details to Firestore (Users collection) with 'uid' as the document ID
-        await FirebaseFirestore.instance
-            .collection('Users')
-            .doc(userCredential.user!.uid)
-
-            .set({
-          'userId': userId,
-          'username': displayNameController.text,
-          'bio': 'Tell us about yourself',
-          'phoneNo': phoneNumberController.text,
-          'profilePicture': profilePicURL,
-        });
-
-        // Add user details to Firestore (users collection)
-        await FirebaseFirestore.instance
-            .collection('users') // This could be the main users collection
-            .doc(userId) // Using 'uid' as the document ID
-            .set({
-          'name': displayNameController.text,
-          'pfpURL': profilePicURL,
-          'uid': userId,
-        });
-
-        Navigator.pop(context); // Close the loading dialog
-      } else {
-        Navigator.pop(context);
-        showDialog(
-          context: context,
-          builder: (context) {
-            return const AlertDialog(
-              title: Text('Error uploading profile picture.'),
-            );
-          },
+    showDialog(
+      context: context,
+      builder: (context) {
+        return const Center(
+          child: CircularProgressIndicator(),
         );
+      },
+    );
+
+    try {
+      if (passwordController.text == confirmPasswordController.text) {
+        // Create the user with Firebase Authentication
+        UserCredential userCredential = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(
+          email: usernameController.text,
+          password: passwordController.text,
+        );
+
+        // Get the user's unique ID
+        String userId = userCredential.user!.uid;
+
+        // Load the default profile picture
+        final File defaultProfilePicFile = await getDefaultProfilePicFile();
+
+        // Upload default profile picture to Firebase Storage
+        String? profilePicURL = await StorageService().uploadUserPfp(
+          file: defaultProfilePicFile,
+          uid: userId,
+        );
+
+        if (profilePicURL != null) {
+          // Add user details to Firestore (Users collection) with 'uid' as the document ID
+          await FirebaseFirestore.instance
+              .collection('Users') // This is for the owner collection
+              .doc(userId) // Using 'uid' as the document ID
+              .set({
+            'userId': userId,
+            'username': displayNameController.text,
+            'bio': 'Tell us about yourself',
+            'phoneNo': phoneNumberController.text,
+            'profilePicture': profilePicURL,
+          });
+
+          // Add user details to Firestore (users collection)
+          await FirebaseFirestore.instance
+              .collection('users') // This could be the main users collection
+              .doc(userId) // Using 'uid' as the document ID
+              .set({
+            'name': displayNameController.text,
+            'pfpURL': profilePicURL,
+            'uid': userId,
+          });
+
+          Navigator.pop(context); // Close the loading dialog
+        } else {
+          Navigator.pop(context);
+          showDialog(
+            context: context,
+            builder: (context) {
+              return const AlertDialog(
+                title: Text('Error uploading profile picture.'),
+              );
+            },
+          );
+        }
+      } else {
+        Navigator.pop(context); // Close the loading dialog
+        wrongPasswordMessage();
       }
-    } else {
+    } on FirebaseAuthException catch (e) {
       Navigator.pop(context); // Close the loading dialog
-      wrongPasswordMessage();
-    }
-  } on FirebaseAuthException catch (e) {
-    Navigator.pop(context); // Close the loading dialog
-    if (e.code == 'user-not-found') {
-      wrongEmailMessage();
-    } else if (e.code == 'wrong-password') {
-      wrongPasswordMessage();
+      if (e.code == 'user-not-found') {
+        wrongEmailMessage();
+      } else if (e.code == 'wrong-password') {
+        wrongPasswordMessage();
+      }
     }
   }
-}
 
 
   @override

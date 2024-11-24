@@ -7,8 +7,8 @@ import 'package:roofmate/pages/chat_page.dart';
 import 'package:roofmate/pages/map.dart';
 import 'package:roofmate/pages/mapDirection.dart';
 import 'package:roofmate/services/database_service.dart';
-import 'map.dart';
 import 'package:roofmate/pages/posterDetailsPage.dart';
+import 'package:roofmate/pages/payment_handler.dart';
 
 
 class detailsPage extends StatelessWidget {
@@ -82,145 +82,179 @@ class detailsPage extends StatelessWidget {
                     style: TextStyle(fontSize: 16),
                     textAlign: TextAlign.justify,
                   ),
-                  SizedBox(height: 20),
-                  Text(
-                    description,
-                    style: TextStyle(fontSize: 16),
-                    textAlign: TextAlign.justify,
-                  ),
 
-                  SizedBox(height: 20),
-                  Text(
-                    description,
-                    style: TextStyle(fontSize: 16),
-                    textAlign: TextAlign.justify,
-                  ),
 
                   SizedBox(height: 20),
                   Column(
                     children: [Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 10, 0, 30),
-                      child: ElevatedButton.icon(
-                        icon: Icon(Icons.person),
-                        label: Text('Contact Owner'),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PosterDetailsPage(userId: userId),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                      ),
-                    ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           ElevatedButton.icon(
-                            icon: Icon(Icons.map),
-                            label: Text('Maps'),
+                            icon: Icon(Icons.person),
+                            label: Text('Contact Owner'),
                             onPressed: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => MapPage(documentId: documentId),
+                                  builder: (context) => PosterDetailsPage(userId: userId),
                                 ),
                               );
                             },
                             style: ElevatedButton.styleFrom(
                               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              side: const BorderSide(
+                                color: Colors.grey,
+                                width: 1,
+                              ),
                             ),
                           ),
+                          SizedBox(width: 20,),
+
                           ElevatedButton.icon(
-                            icon: Icon(Icons.directions),
-                            label: Text('Get Directions'),
-                            onPressed: () {
+                            icon: Icon(Icons.chat),
+                            label: Text('Chat'),
+                            onPressed: () async {
+                              final DatabaseService dbService = DatabaseService();
+
+                              // Fetch advertisement owner's profile
+                              final DocumentSnapshot<Map<String, dynamic>> ownerDoc =
+                              await FirebaseFirestore.instance.collection('users').doc(ownerId).get();
+
+                              final Map<String, dynamic> ownerData = ownerDoc.data()!;
+                              print(ownerData);  // Print out the fields of the document
+
+                              if (!ownerDoc.exists) {
+                                // Handle the case where the owner document doesn't exist
+                                print('Owner document not found for ownerId: $ownerId');
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Owner data not found')),
+                                );
+                                return;
+                              }
+
+                              final UserProfile ownerProfile = UserProfile.fromJson(ownerDoc.data()!);
+
+                              // Fetch current user's profile
+                              final currentUser = FirebaseAuth.instance.currentUser;
+
+                              if (currentUser == null) {
+                                // Handle the case where the user is not authenticated
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('User is not authenticated')),
+                                );
+                                return;
+                              }
+
+                              final UserProfile currentUserProfile = UserProfile(
+                                uid: currentUser.uid,
+                                name: currentUser.displayName ?? "Anonymous",
+                                pfpURL: currentUser.photoURL ?? "",
+                              );
+
+                              // Create user profile for current user if it doesn't exist
+                              await dbService.createUserProfile(userProfile: currentUserProfile);
+
+                              // Check if a chat already exists between the two users
+                              bool chatExists = await dbService.checkChatExists(currentUser.uid, ownerId);
+
+                              // If chat doesn't exist, create one
+                              if (!chatExists) {
+                                await dbService.createNewChat(currentUser.uid, ownerId);
+                              }
+
+                              // Navigate to ChatPage
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => MapDirection(documentId: documentId),
+                                  builder: (context) => ChatPage(chatUser: ownerProfile),
                                 ),
                               );
                             },
                             style: ElevatedButton.styleFrom(
                               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              side: const BorderSide(
+                                color: Colors.grey,
+                                width: 1,
+                              ),
                             ),
                           ),
-                          // Text(data)
                         ],
                       ),
-                      ElevatedButton.icon(
-                        icon: Icon(Icons.chat),
-                        label: Text('Chat'),
-                        onPressed: () async {
-                          final DatabaseService dbService = DatabaseService();
-
-                          // Fetch advertisement owner's profile
-                          final DocumentSnapshot<Map<String, dynamic>> ownerDoc =
-                              await FirebaseFirestore.instance.collection('users').doc(ownerId).get();
-                          
-                          final Map<String, dynamic> ownerData = ownerDoc.data()!;
-                          print(ownerData);  // Print out the fields of the document
-
-                          if (!ownerDoc.exists) {
-                            // Handle the case where the owner document doesn't exist
-                            print('Owner document not found for ownerId: $ownerId');
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Owner data not found')),
-                            );
-                            return;
-                          }
-
-                          final UserProfile ownerProfile = UserProfile.fromJson(ownerDoc.data()!);
-
-                          // Fetch current user's profile
-                          final currentUser = FirebaseAuth.instance.currentUser;
-
-                          if (currentUser == null) {
-                            // Handle the case where the user is not authenticated
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('User is not authenticated')),
-                            );
-                            return;
-                          }
-
-                          final UserProfile currentUserProfile = UserProfile(
-                            uid: currentUser.uid,
-                            name: currentUser.displayName ?? "Anonymous",
-                            pfpURL: currentUser.photoURL ?? "",
-                          );
-
-                          // Create user profile for current user if it doesn't exist
-                          await dbService.createUserProfile(userProfile: currentUserProfile);
-
-                          // Check if a chat already exists between the two users
-                          bool chatExists = await dbService.checkChatExists(currentUser.uid, ownerId);
-
-                          // If chat doesn't exist, create one
-                          if (!chatExists) {
-                            await dbService.createNewChat(currentUser.uid, ownerId);
-                          }
-
-                          // Navigate to ChatPage
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ChatPage(chatUser: ownerProfile),
+                    ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            ElevatedButton.icon(
+                              icon: Icon(Icons.directions),
+                              label: Text('Get Directions'),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => MapDirection(documentId: documentId),
+                                  ),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                side: const BorderSide(
+                                  color: Colors.grey,
+                                  width: 1,
+                                ),
+                              ),
                             ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ElevatedButton.icon(
+                              icon: Icon(Icons.map),
+                              label: Text('Maps'),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => MapPage(documentId: documentId),
+                                  ),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                side: const BorderSide(
+                                  color: Colors.grey,
+                                  width: 1,
+                                ),
+                              ),
+                            ),
+
+                            // Text(data)
+                          ],
                         ),
                       ),
-
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PaymentHandler(hotel: data),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            side: const BorderSide(
+                              color: Colors.grey,
+                              width: 1,
+                            ),
+                          ),
+                          child: const Text("Book Now"),
+                        ),
+                      ),
                     ],
                   ),
                 ],
