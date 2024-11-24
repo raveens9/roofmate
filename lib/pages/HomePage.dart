@@ -155,14 +155,14 @@ class _ExplorePageState extends State<ExplorePage> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.fromLTRB(10, 15, 10, 0),
           child: TextField(
             controller: searchController,
             decoration: InputDecoration(
               prefixIcon: const Icon(Icons.search),
               hintText: 'Search...',
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12.0),
+                borderRadius: BorderRadius.circular(14),
               ),
               filled: true,
               fillColor: Colors.white,
