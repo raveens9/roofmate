@@ -1,3 +1,4 @@
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:roofmate/components/textBox.dart';
 import 'package:roofmate/pages/yourListingsPage.dart';
-import 'dart:io';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -45,7 +45,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
 
     if (newValue.trim().length > 0) {
-      await usersCollection.doc(user.email).update({field: newValue});
+      await usersCollection.doc(user.uid).update({field: newValue});
     }
   }
 
@@ -54,15 +54,37 @@ class _ProfilePageState extends State<ProfilePage> {
 
     if (pickedFile != null) {
       final file = File(pickedFile.path);
-      final storageRef = FirebaseStorage.instance
-          .ref()
-          .child('profile_pictures/${user.uid}.jpg');
-      final uploadTask = storageRef.putFile(file);
+      final storageRef =
+          FirebaseStorage.instance.ref().child('users/pfps/${user.uid}.jpg');
 
+      // Delete old profile picture if it exists
+      try {
+        await storageRef.delete();
+      } catch (e) {
+        print("No existing profile picture to delete or error deleting: $e");
+      }
+
+      // Upload the new profile picture
+      final uploadTask = storageRef.putFile(file);
       final snapshot = await uploadTask.whenComplete(() => {});
       final downloadUrl = await snapshot.ref.getDownloadURL();
 
-      await usersCollection.doc(user.email).update({'profilePicture': downloadUrl});
+      // Update the pfpURL in Firestore
+      await usersCollection.doc(user.uid).update({
+        'profilePicture': downloadUrl,
+      });
+
+      // Update in the 'users' collection
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update({
+        'pfpURL': downloadUrl,
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Profile picture updated successfully!')),
+      );
     }
   }
 
@@ -81,7 +103,7 @@ class _ProfilePageState extends State<ProfilePage> {
         backgroundColor: Colors.blue[100],
       ),
       body: StreamBuilder<DocumentSnapshot>(
-        stream: usersCollection.doc(user.email).snapshots(),
+        stream: usersCollection.doc(user.uid).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final userData = snapshot.data!.data() as Map<String, dynamic>;
@@ -92,13 +114,21 @@ class _ProfilePageState extends State<ProfilePage> {
                 SizedBox(height: 30),
                 GestureDetector(
                   onTap: _pickImage,
-                  child: CircleAvatar(
-                    radius: 50,
-                    backgroundImage: profilePictureUrl.isNotEmpty
-                        ? NetworkImage(profilePictureUrl)
-                        : null,
+                  child: Container(
+                    width: 120, // Width of the profile picture
+                    height: 120, // Height of the profile picture
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: profilePictureUrl.isNotEmpty
+                          ? DecorationImage(
+                              image: NetworkImage(profilePictureUrl),
+                              fit: BoxFit.contain, // Ensures the image is fully visible
+                            )
+                          : null,
+                      color: Colors.grey[300], // Placeholder background color
+                    ),
                     child: profilePictureUrl.isEmpty
-                        ? Icon(Icons.person, size: 72)
+                        ? Icon(Icons.person, size: 50, color: Colors.grey[700])
                         : null,
                   ),
                 ),
@@ -153,5 +183,4 @@ class _ProfilePageState extends State<ProfilePage> {
       floatingActionButtonLocation: FloatingActionButtonLocation.miniCenterFloat,
     );
   }
-
 }

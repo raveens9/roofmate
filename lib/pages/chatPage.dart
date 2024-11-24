@@ -27,12 +27,12 @@ class _ChatpageState extends State<Chatpage> {
     super.initState();
     _authService = _getIt.get<AuthService>();
     _databaseService = _getIt.get<DatabaseService>();
-    _searchController = TextEditingController(); 
+    _searchController = TextEditingController();
   }
 
   @override
   void dispose() {
-    _searchController.dispose(); 
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -58,7 +58,7 @@ class _ChatpageState extends State<Chatpage> {
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [Color.fromARGB(255, 226, 226, 225), Colors.white],
-          begin: Alignment.topLeft, 
+          begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
       ),
@@ -75,7 +75,7 @@ class _ChatpageState extends State<Chatpage> {
                 decoration: InputDecoration(
                   hintText: 'Search',
                   prefixIcon: const Icon(Icons.search),
-                  filled: true, 
+                  filled: true,
                   fillColor: Color.fromARGB(255, 251, 252, 250),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
