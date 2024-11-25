@@ -363,7 +363,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                       Padding(
                                         padding: const EdgeInsets.all(8.0),
                                         child: Text(
-                                          "Rs. $price per night",
+                                          "Rs. $price per month",
                                           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                         ),
                                       ),

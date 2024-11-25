@@ -3,9 +3,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:roofmate/pages/chatPage.dart';
-import 'package:roofmate/pages/savedPage.dart';
-import 'package:roofmate/pages/ProfilePage.dart';
 import 'package:roofmate/pages/detailsPage.dart';
 import 'package:roofmate/pages/AddListingPage.dart';
 import 'package:roofmate/services/confirm_deletion_dialog.dart';

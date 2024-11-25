@@ -62,7 +62,7 @@ class _AddListingState extends State<AddListing> {
       await locationsCollection.add({
         'item': _itemName,
         'description': _description,
-        'price': double.parse(_price),
+        'price': int.parse(_price),
         'imageurl': imageUrl,
         'userId': user.uid,
         'latitude': _selectedLocation!.latitude,
