@@ -6,6 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:roofmate/components/textBox.dart';
+import 'package:roofmate/pages/userListingdetailsPage.dart';
 import 'package:roofmate/pages/yourListingsPage.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -91,7 +92,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void _navigateToYourListings() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => YourListings()),
+      MaterialPageRoute(builder: (context) => UserListings()),
     );
   }
 

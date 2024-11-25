@@ -7,11 +7,10 @@ import 'package:roofmate/pages/AddListingPage.dart';
 import 'package:roofmate/pages/ProfilePage.dart';
 import 'package:roofmate/pages/chatPage.dart';
 import 'package:roofmate/pages/detailsPage.dart';
-import 'package:roofmate/pages/AddListingPage.dart';
 import 'package:roofmate/pages/payment_handler.dart';
-import 'filterPage.dart'; // Import the payment handler
-import 'package:roofmate/pages/payment_handler.dart'; // Import the payment handler
 import 'package:roofmate/pages/savedPage.dart';
+import 'package:roofmate/pages/userFavorites.dart';
+import 'filterPage.dart';
 
 
 class HomePage extends StatefulWidget {
@@ -27,20 +26,17 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
   void signUserOut(BuildContext context) async {
-    // Show the confirmation dialog
     bool confirmLogout = await showLogoutConfirmationDialog(context);
 
-    // If the user confirms, log them out
     if (confirmLogout) {
       FirebaseAuth.instance.signOut();
     }
   }
 
-// Function to show the confirmation dialog
   Future<bool> showLogoutConfirmationDialog(BuildContext context) {
     return showDialog<bool>(
       context: context,
-      barrierDismissible: false, // Prevent dismissing the dialog by tapping outside
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Log Out'),
@@ -86,8 +82,8 @@ class _HomePageState extends State<HomePage> {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 30,
-            color: Colors.black, // Dark purple
-            fontFamily: 'SF-Pro', // Use the custom font family
+            color: Colors.black,
+            fontFamily: 'SF-Pro',
           ),
         ),
 
@@ -111,7 +107,6 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: _selectedIndex == 0
           ? FloatingActionButton(
         onPressed: () {
-          // Navigate to AddListingPage when FAB is pressed
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => AddListing()),
