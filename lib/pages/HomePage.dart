@@ -12,6 +12,9 @@ import 'package:roofmate/pages/payment_handler.dart';
 import 'filterPage.dart'; // Import the payment handler
 import 'package:roofmate/pages/payment_handler.dart'; // Import the payment handler
 import 'package:roofmate/pages/savedPage.dart';
+import 'package:url_launcher/url_launcher.dart'; // Import url_launcher
+import 'package:roofmate/pages/sendEmailPage.dart';
+
 
 
 class HomePage extends StatefulWidget {
@@ -129,6 +132,36 @@ class _ExplorePageState extends State<ExplorePage> {
   final TextEditingController searchController = TextEditingController();
   String searchQuery = "";
   Map<String, dynamic> filters = {}; // State to hold active filters
+
+  // Function to send email using the mailto link
+  Future<void> _sendEmail(String listingName, String price) async {
+    final String email = "support@roofmate.com"; // Your email address
+    final String subject = "Booking Confirmation for $listingName";
+    final String body = "Thank you for booking $listingName with RoofMate.\n\nYour booking price: Rs. $price.";
+
+    final Uri emailUri = Uri(
+      scheme: 'mailto',
+      path: email,
+      queryParameters: {
+        'subject': subject,
+        'body': body,
+      },
+    );
+
+    // Try to launch the email client
+    if (await canLaunch(emailUri.toString())) {
+      await launch(emailUri.toString());
+    } else {
+      throw 'Could not open the email app';
+    }
+  }
+
+  // Handle booking action and send email
+  void _handleBooking(String listingName, String price) {
+    // Call _sendEmail when the booking button is pressed
+    _sendEmail(listingName, price);
+  }
+
 
   Future<bool> isFavorite(String listingId) async {
     final favorite = await FirebaseFirestore.instance
@@ -333,28 +366,30 @@ class _ExplorePageState extends State<ExplorePage> {
                                       ),
                                     ],
                                   ),
-                                  Positioned(
-                                    bottom: 0,
-                                    right: 1,
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => PaymentHandler(hotel: data),
-                                          ),
-                                        );
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        side: const BorderSide(
-                                          color: Colors.grey,
-                                          width: 3,
+                                Positioned(
+                                  bottom: 0,
+                                  right: 1,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => PaymentHandler(hotel: data),
                                         ),
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      side: const BorderSide(
+                                        color: Colors.grey,
+                                        width: 3,
                                       ),
-                                      child: const Text("Book Now"),
                                     ),
-
+                                    child: const Text("Book Now"),
                                   ),
+                                ),
+
+
+
                                 ],
                               ),
                             ),
