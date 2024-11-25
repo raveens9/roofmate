@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:roofmate/pages/HomePage.dart';
-import 'dart:io';
 
 class AddListing extends StatefulWidget {
   @override
@@ -22,8 +22,11 @@ class _AddListingState extends State<AddListing> {
   bool _isLoading = false;
   final user = FirebaseAuth.instance.currentUser!;
   final locationsCollection = FirebaseFirestore.instance.collection('Locations');
+  final usersCollection = FirebaseFirestore.instance.collection('Users');
+  final username = FirebaseFirestore.instance.collection('Users').doc();
   final ImagePicker _picker = ImagePicker();
 
+  // Function to pick an image
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
 
@@ -36,11 +39,14 @@ class _AddListingState extends State<AddListing> {
 
   // Function to add a new listing to Firestore
   Future<void> _addListing() async {
-    if (_formKey.currentState!.validate() && _selectedLocation != null) {
+    if (_formKey.currentState!.validate() && _selectedLocation != null && _imageFile != null) {
       setState(() {
         _isLoading = true;
       });
 
+      DocumentSnapshot userDoc = await usersCollection.doc(user.uid).get();
+
+      // Extract the phone number and display nam
       String? imageUrl;
 
       if (_imageFile != null) {
@@ -56,14 +62,14 @@ class _AddListingState extends State<AddListing> {
       await locationsCollection.add({
         'item': _itemName,
         'description': _description,
-        'price': double.parse(_price),
+        'price': int.parse(_price),
         'imageurl': imageUrl,
         'userId': user.uid,
-        'latitude': _selectedLocation!.latitude, // Save selected latitude
-        'longitude': _selectedLocation!.longitude, // Save selected longitude
+        'latitude': _selectedLocation!.latitude,
+        'longitude': _selectedLocation!.longitude,
         'timestamp': FieldValue.serverTimestamp(),
+        'username': username
       });
-
       setState(() {
         _isLoading = false;
       });
@@ -79,7 +85,7 @@ class _AddListingState extends State<AddListing> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please select a location')),
+        SnackBar(content: Text('Please select an image and location')),
       );
     }
   }
@@ -111,12 +117,12 @@ class _AddListingState extends State<AddListing> {
             children: [
               TextFormField(
                 decoration: InputDecoration(
-                  labelText: 'Item Name',
+                  labelText: 'Enter the location of your listing',
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Please enter an item name';
+                    return 'Please enter the listing name';
                   }
                   return null;
                 },
@@ -129,13 +135,16 @@ class _AddListingState extends State<AddListing> {
               SizedBox(height: 16),
               TextFormField(
                 decoration: InputDecoration(
-                  labelText: 'Description',
+                  labelText: 'Add a brief description about your property (Minimum of 20 characters)',
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 3,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Please enter a description';
+                  }
+                  if (value.trim().length < 2) {
+                    return 'Description must be at least 20 characters long';
                   }
                   return null;
                 },
@@ -148,10 +157,9 @@ class _AddListingState extends State<AddListing> {
               SizedBox(height: 16),
               TextFormField(
                 decoration: InputDecoration(
-                  labelText: 'Price (Rs.)',
+                  labelText: 'Rent fee (Rs.)',
                   border: OutlineInputBorder(),
                 ),
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Please enter a price';
@@ -188,8 +196,8 @@ class _AddListingState extends State<AddListing> {
               _isLoading
                   ? CircularProgressIndicator()
                   : ElevatedButton(
-                onPressed: _addListing,
-                child: Text('Add Listing'),
+                onPressed: _imageFile == null ? null : _addListing,
+                child: Text('Add Listing!'),
                 style: ElevatedButton.styleFrom(
                   minimumSize: Size(double.infinity, 50),
                 ),

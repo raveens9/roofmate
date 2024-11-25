@@ -3,7 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MapPage extends StatefulWidget {
-  final String documentId; // Pass the document ID from Firestore to this page
+  final String documentId;
 
   MapPage({required this.documentId});
 
