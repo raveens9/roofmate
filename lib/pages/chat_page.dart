@@ -71,28 +71,27 @@ class _ChatPageState extends State<ChatPage> {
       builder: (context, snapshot) {
         Chat? chat = snapshot.data?.data();
         List<ChatMessage> messages = [];
-        if (chat != null && chat.messages != null){
-          messages = _generateChatMessagesList(
-            chat.messages!,
-          );
+        if (chat != null && chat.messages != null) {
+          messages = _generateChatMessagesList(chat.messages!);
         }
+
         return DashChat(
-      messageOptions: const MessageOptions(
-        showOtherUsersAvatar: true,
-        showTime: true,
-      ),
-      inputOptions: InputOptions(
-        alwaysShowSend: true,
-        trailing: [
-          _mediaMessageButton(),
-        ],
-      ),
-      currentUser: currentUser!, 
-      onSend: _sendMessage, 
-      messages: messages,
-      );
+          messageOptions: const MessageOptions(
+            showOtherUsersAvatar: true,
+            showTime: true,
+          ),
+          inputOptions: InputOptions(
+            alwaysShowSend: true,
+            trailing: [
+              _mediaMessageButton(),
+            ],
+          ),
+          currentUser: currentUser!,
+          onSend: _sendMessage,
+          messages: messages,
+        );
       },
-      );
+    );
   }
 
   Future<void> _sendMessage(ChatMessage chatMessage) async{
@@ -127,9 +126,9 @@ class _ChatPageState extends State<ChatPage> {
     
   }
 
-  List<ChatMessage> _generateChatMessagesList(List<Message> messages){
+  List<ChatMessage> _generateChatMessagesList(List<Message> messages) {
     List<ChatMessage> chatMessages = messages.map((m) {
-      if(m.messageType == MessageType.Image){
+      if (m.messageType == MessageType.Image) {
         return ChatMessage(
           user: m.senderID == currentUser!.id ? currentUser! : otherUser!,
           createdAt: m.sentAt!.toDate(),
@@ -138,22 +137,22 @@ class _ChatPageState extends State<ChatPage> {
               url: m.content!,
               fileName: "",
               type: MediaType.image,
-              ),
-          ]
-          );
-      }else{
+            ),
+          ],
+        );
+      } else {
         return ChatMessage(
-        user: m.senderID == currentUser!.id ? currentUser! : otherUser!, 
-        text: m.content!,
-        createdAt: m.sentAt!.toDate(),
-      );
+          user: m.senderID == currentUser!.id ? currentUser! : otherUser!,
+          text: m.content!,
+          createdAt: m.sentAt!.toDate(),
+        );
       }
-      
     }).toList();
-    chatMessages.sort((a,b){
+
+    chatMessages.sort((a, b) {
       return b.createdAt.compareTo(a.createdAt);
-    },
-    );
+    });
+
     return chatMessages;
   }
 

@@ -85,60 +85,68 @@ class _SavedPageState extends State<SavedPage> {
                   final String docId = doc.id;
 
                   return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Card(
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => detailsPage(documentId: locationId),
-                            ),
-                          );
-                        },
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            imageUrl.isNotEmpty
-                                ? Image.network(imageUrl, width: double.infinity, height: 150, fit: BoxFit.cover)
-                                : Container(
-                              width: double.infinity,
-                              height: 150,
-                              color: Colors.grey[300],
-                              child:  Icon(Icons.image, color: Colors.grey[700]),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                                  IconButton(
-                                    icon: Icon(Icons.delete, color: Colors.blue[300]),
-                                    onPressed: () {
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) => ConfirmFavoriteDialog(
-                                          onConfirm: () async {
-                                            await FirebaseFirestore.instance
-                                                .collection('favorites')
-                                                .doc(docId)
-                                                .delete();
+                    padding: const EdgeInsets.fromLTRB(18,0,18,0),
+                    child: Column(
+                      children: [SizedBox(height: 10),
+                        Card(
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => detailsPage(documentId: locationId),
+                                ),
+                              );
+                            },
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                imageUrl.isNotEmpty
+                                    ? Image.network(imageUrl, width: double.infinity, height: 150, fit: BoxFit.cover)
+                                    : Container(
+                                  width: double.infinity,
+                                  height: 150,
+                                  color: Colors.grey[300],
+                                  child:  Icon(Icons.image, color: Colors.grey[700]),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                      IconButton(
+                                        icon: Icon(Icons.delete, color: Colors.blue[300]),
+                                          onPressed: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) => ConfirmFavoriteDialog(
+                                                onConfirm: () async {
+                                                  await FirebaseFirestore.instance
+                                                      .collection('users')
+                                                      .doc(user.uid) // Use the current user's UID
+                                                      .collection('favorites')
+                                                      .doc(locationId) // Use the correct document ID from `favorites`
+                                                      .delete();
 
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(content: Text('Listing deleted successfully')),
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    const SnackBar(content: Text('Favorite removed successfully')),
+                                                  );
+
+                                                  setState(() {});
+                                                },
+                                              ),
                                             );
                                           },
-                                        ),
-                                      );
-                                    },
-                                  )
-                                ],
-                              ),
+                                      )
+                                    ],
+                                  ),
 
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   );
                 },
